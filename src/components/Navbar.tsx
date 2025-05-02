@@ -12,10 +12,24 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import LoginForm from "./LoginForm";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const handleLoginSuccess = () => {
+    setIsLoginOpen(false);
+  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -43,7 +57,22 @@ const Navbar = () => {
             <a href="#for-influencers" className="text-gray-700 hover:text-brand-600">For Influencers</a>
             <a href="#for-shoppers" className="text-gray-700 hover:text-brand-600">For Shoppers</a>
             <div className="flex space-x-3">
-              <Button variant="outline">Log In</Button>
+              <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline">Log In</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Log In to Your Account</SheetTitle>
+                    <SheetDescription>
+                      Enter your credentials to access your account
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <LoginForm onSuccess={handleLoginSuccess} />
+                  </div>
+                </SheetContent>
+              </Sheet>
               <Button>Sign Up</Button>
             </div>
           </div>
@@ -98,7 +127,22 @@ const Navbar = () => {
               For Shoppers
             </a>
             <div className="mt-4 space-y-2 px-3">
-              <Button className="w-full" variant="outline">Log In</Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button className="w-full" variant="outline">Log In</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Log In to Your Account</SheetTitle>
+                    <SheetDescription>
+                      Enter your credentials to access your account
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <LoginForm onSuccess={() => setIsMenuOpen(false)} />
+                  </div>
+                </SheetContent>
+              </Sheet>
               <Button className="w-full">Sign Up</Button>
             </div>
           </div>
@@ -166,4 +210,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
