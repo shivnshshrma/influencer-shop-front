@@ -21,14 +21,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import LoginForm from "./LoginForm";
+import SignupForm from "./SignupForm";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const handleLoginSuccess = () => {
     setIsLoginOpen(false);
+  };
+
+  const handleSignupSuccess = () => {
+    setIsSignupOpen(false);
   };
 
   return (
@@ -73,7 +79,23 @@ const Navbar = () => {
                   </div>
                 </SheetContent>
               </Sheet>
-              <Button>Sign Up</Button>
+              
+              <Sheet open={isSignupOpen} onOpenChange={setIsSignupOpen}>
+                <SheetTrigger asChild>
+                  <Button>Sign Up</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Create Your Account</SheetTitle>
+                    <SheetDescription>
+                      Fill out the form below to get started
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <SignupForm onSuccess={handleSignupSuccess} />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
           
@@ -143,7 +165,23 @@ const Navbar = () => {
                   </div>
                 </SheetContent>
               </Sheet>
-              <Button className="w-full">Sign Up</Button>
+              
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button className="w-full">Sign Up</Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Create Your Account</SheetTitle>
+                    <SheetDescription>
+                      Fill out the form below to get started
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <SignupForm onSuccess={() => setIsMenuOpen(false)} />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
