@@ -8,12 +8,12 @@ import { toast } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Phone } from "lucide-react";
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  phoneNumber: z.string().min(10, { message: "Please enter a valid phone number" }).optional(),
+  phoneNumber: z.string().length(10, { message: "Phone number must be exactly 10 digits" }).regex(/^\d+$/, { message: "Phone number must contain only digits" }).optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Please confirm your password" }),
   terms: z.boolean().refine(val => val === true, {
@@ -51,7 +51,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       console.log("Signup attempt with:", {
         name: data.fullName,
         email: data.email,
-        phone: data.phoneNumber,
+        phone: data.phoneNumber ? `+91${data.phoneNumber}` : undefined,
         termsAccepted: data.terms
       });
       
@@ -117,11 +117,25 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input 
-                  type="tel" 
-                  placeholder="+1 (555) 123-4567" 
-                  {...field} 
-                />
+                <div className="flex">
+                  <div className="flex items-center justify-center px-3 bg-gray-100 border border-r-0 border-input rounded-l-md">
+                    <Phone className="h-4 w-4 text-gray-500 mr-1" />
+                    <span className="text-sm font-medium">+91</span>
+                  </div>
+                  <Input
+                    className="rounded-l-none"
+                    type="text" 
+                    inputMode="numeric"
+                    placeholder="1234567890"
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      e.target.value = value;
+                      field.onChange(value);
+                    }}
+                    value={field.value}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
