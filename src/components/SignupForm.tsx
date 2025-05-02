@@ -13,6 +13,7 @@ import { Eye, EyeOff } from "lucide-react";
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
+  phoneNumber: z.string().min(10, { message: "Please enter a valid phone number" }).optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Please confirm your password" }),
   terms: z.boolean().refine(val => val === true, {
@@ -35,6 +36,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     defaultValues: {
       fullName: "",
       email: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
       terms: false
@@ -49,6 +51,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       console.log("Signup attempt with:", {
         name: data.fullName,
         email: data.email,
+        phone: data.phoneNumber,
         termsAccepted: data.terms
       });
       
@@ -101,6 +104,24 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="your@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input 
+                  type="tel" 
+                  placeholder="+1 (555) 123-4567" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
