@@ -22,7 +22,8 @@ const ProfileButton = () => {
     // In a real app, this would clear authentication state
     console.log("Logging out");
     localStorage.removeItem("isLoggedIn");
-    window.location.reload();
+    // Redirect to the landing page after logout
+    navigate("/");
   };
 
   return (
