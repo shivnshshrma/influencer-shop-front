@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Camera, UserRound } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -49,6 +50,7 @@ type MeasurementsFormValues = z.infer<typeof measurementsSchema>;
 const Profile = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Mock user data - in a real app, this would come from your auth system
   const [user, setUser] = useState({
@@ -66,6 +68,14 @@ const Profile = () => {
     }
   });
 
+  // Load user data from localStorage when component mounts
+  useEffect(() => {
+    const savedUser = localStorage.getItem("userData");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -74,6 +84,13 @@ const Profile = () => {
       phone: user.phone,
     }
   });
+
+  // Update form values when user data changes
+  useEffect(() => {
+    profileForm.setValue("name", user.name);
+    profileForm.setValue("email", user.email);
+    profileForm.setValue("phone", user.phone || "");
+  }, [user, profileForm]);
 
   const measurementsForm = useForm<MeasurementsFormValues>({
     resolver: zodResolver(measurementsSchema),
@@ -87,15 +104,51 @@ const Profile = () => {
     }
   });
 
+  // Handle avatar upload
+  const handleAvatarClick = () => {
+    if (isEditMode && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newUser = { ...user, avatar: e.target?.result as string };
+      setUser(newUser);
+      localStorage.setItem("userData", JSON.stringify(newUser));
+      toast.success("Profile picture updated");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProfileSubmit = (data: ProfileFormValues) => {
     console.log("Profile data:", data);
     // In a real app, you'd update the user profile here
-    setUser({
+    const updatedUser = {
       ...user,
       name: data.name,
       email: data.email,
       phone: data.phone || user.phone,
-    });
+    };
+    
+    setUser(updatedUser);
+    localStorage.setItem("userData", JSON.stringify(updatedUser));
     setIsEditMode(false);
     toast.success("Profile updated successfully!");
   };
@@ -103,7 +156,7 @@ const Profile = () => {
   const handleMeasurementsSubmit = (data: MeasurementsFormValues) => {
     console.log("Measurements data:", data);
     // In a real app, you'd update the user measurements here
-    setUser({
+    const updatedUser = {
       ...user,
       measurements: {
         height: data.height,
@@ -113,7 +166,10 @@ const Profile = () => {
         shoeSize: data.shoeSize || user.measurements.shoeSize,
         skinTone: data.skinTone || user.measurements.skinTone,
       }
-    });
+    };
+    
+    setUser(updatedUser);
+    localStorage.setItem("userData", JSON.stringify(updatedUser));
     toast.success("Measurements updated successfully!");
   };
 
@@ -124,12 +180,29 @@ const Profile = () => {
         <div className="max-w-3xl mx-auto bg-white shadow rounded-lg overflow-hidden">
           <div className="p-6 bg-brand-50">
             <div className="flex flex-col md:flex-row items-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="bg-brand-600 text-white text-2xl">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div 
+                className={`relative ${isEditMode ? "cursor-pointer" : ""}`}
+                onClick={handleAvatarClick}
+              >
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback className="bg-brand-600 text-white text-2xl">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {isEditMode && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                    <Camera className="text-white" />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                )}
+              </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold">{user.name}</h1>
                 <p className="text-gray-500">{user.email}</p>
@@ -185,10 +258,12 @@ const Profile = () => {
                             placeholder="Your email" 
                             type="email" 
                             {...field} 
-                            disabled={!isEditMode}
+                            disabled={true} // Always disabled to restrict editing
+                            className="bg-gray-100"
                           />
                         </FormControl>
                         <FormMessage />
+                        <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
                       </FormItem>
                     )}
                   />

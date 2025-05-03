@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,11 +12,19 @@ import { useNavigate } from "react-router-dom";
 
 const ProfileButton = () => {
   const navigate = useNavigate();
-  const [user] = useState({
+  const [user, setUser] = useState({
     name: "User",
     email: "user@example.com",
     avatar: ""
   });
+
+  // Load user data from localStorage when component mounts
+  useEffect(() => {
+    const savedUser = localStorage.getItem("userData");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const handleLogout = () => {
     // In a real app, this would clear authentication state
