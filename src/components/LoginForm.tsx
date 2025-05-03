@@ -38,6 +38,9 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       
       toast.success("Logged in successfully!");
       
+      // Set logged in status in localStorage for demo purposes
+      localStorage.setItem("isLoggedIn", "true");
+      
       if (onSuccess) {
         onSuccess();
       }

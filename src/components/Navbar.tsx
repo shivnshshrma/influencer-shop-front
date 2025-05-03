@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -22,19 +21,31 @@ import {
 } from "@/components/ui/sheet";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
+import ProfileButton from "./ProfileButton";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const loggedInStatus = localStorage.getItem("isLoggedIn");
+    setIsLoggedIn(loggedInStatus === "true");
+  }, []);
 
   const handleLoginSuccess = () => {
     setIsLoginOpen(false);
+    localStorage.setItem("isLoggedIn", "true");
+    setIsLoggedIn(true);
   };
 
   const handleSignupSuccess = () => {
     setIsSignupOpen(false);
+    localStorage.setItem("isLoggedIn", "true");
+    setIsLoggedIn(true);
   };
 
   return (
@@ -62,41 +73,46 @@ const Navbar = () => {
             <a href="#how-it-works" className="text-gray-700 hover:text-brand-600">How It Works</a>
             <a href="#for-influencers" className="text-gray-700 hover:text-brand-600">For Influencers</a>
             <a href="#for-shoppers" className="text-gray-700 hover:text-brand-600">For Shoppers</a>
-            <div className="flex space-x-3">
-              <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline">Log In</Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Log In to Your Account</SheetTitle>
-                    <SheetDescription>
-                      Enter your credentials to access your account
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <LoginForm onSuccess={handleLoginSuccess} />
-                  </div>
-                </SheetContent>
-              </Sheet>
-              
-              <Sheet open={isSignupOpen} onOpenChange={setIsSignupOpen}>
-                <SheetTrigger asChild>
-                  <Button>Sign Up</Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create Your Account</SheetTitle>
-                    <SheetDescription>
-                      Fill out the form below to get started
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <SignupForm onSuccess={handleSignupSuccess} />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+            
+            {isLoggedIn ? (
+              <ProfileButton />
+            ) : (
+              <div className="flex space-x-3">
+                <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline">Log In</Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Log In to Your Account</SheetTitle>
+                      <SheetDescription>
+                        Enter your credentials to access your account
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <LoginForm onSuccess={handleLoginSuccess} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                
+                <Sheet open={isSignupOpen} onOpenChange={setIsSignupOpen}>
+                  <SheetTrigger asChild>
+                    <Button>Sign Up</Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Create Your Account</SheetTitle>
+                      <SheetDescription>
+                        Fill out the form below to get started
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <SignupForm onSuccess={handleSignupSuccess} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            )}
           </div>
           
           <div className="md:hidden flex items-center space-x-3">
@@ -149,44 +165,59 @@ const Navbar = () => {
               For Shoppers
             </a>
             <div className="mt-4 space-y-2 px-3">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button className="w-full" variant="outline">Log In</Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Log In to Your Account</SheetTitle>
-                    <SheetDescription>
-                      Enter your credentials to access your account
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <LoginForm onSuccess={() => setIsMenuOpen(false)} />
-                  </div>
-                </SheetContent>
-              </Sheet>
-              
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button className="w-full">Sign Up</Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create Your Account</SheetTitle>
-                    <SheetDescription>
-                      Fill out the form below to get started
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <SignupForm onSuccess={() => setIsMenuOpen(false)} />
-                  </div>
-                </SheetContent>
-              </Sheet>
+              {isLoggedIn ? (
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    window.location.href = "/profile";
+                  }}
+                >
+                  My Profile
+                </Button>
+              ) : (
+                <>
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button className="w-full" variant="outline">Log In</Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Log In to Your Account</SheetTitle>
+                        <SheetDescription>
+                          Enter your credentials to access your account
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <LoginForm onSuccess={() => setIsMenuOpen(false)} />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                  
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button className="w-full">Sign Up</Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Create Your Account</SheetTitle>
+                        <SheetDescription>
+                          Fill out the form below to get started
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="mt-6">
+                        <SignupForm onSuccess={() => setIsMenuOpen(false)} />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
 
+      {/* Search dialog */}
       <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
         <Command className="rounded-lg border shadow-md">
           <CommandInput placeholder="Search products, influencers..." />
