@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const products = [
   {
@@ -10,6 +11,7 @@ const products = [
     price: "$249",
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
     influencer: "Emma Johnson",
+    influencerId: 1,
     influencerImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Tech"
   },
@@ -19,6 +21,7 @@ const products = [
     price: "$89",
     image: "https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
     influencer: "Alex Rivera",
+    influencerId: 2,
     influencerImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Fitness"
   },
@@ -28,6 +31,7 @@ const products = [
     price: "$58",
     image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1912&q=80",
     influencer: "Sarah Chen",
+    influencerId: 3,
     influencerImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Beauty"
   },
@@ -37,6 +41,7 @@ const products = [
     price: "$129",
     image: "https://images.unsplash.com/photo-1558089687-f282ffcbc0d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1925&q=80",
     influencer: "Marcus Taylor",
+    influencerId: 4,
     influencerImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Home"
   },
@@ -46,6 +51,7 @@ const products = [
     price: "$35",
     image: "https://images.unsplash.com/photo-1606767041004-6b387b91e360?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80",
     influencer: "Alex Rivera",
+    influencerId: 2,
     influencerImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Lifestyle"
   },
@@ -55,6 +61,7 @@ const products = [
     price: "$175",
     image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80",
     influencer: "Emma Johnson",
+    influencerId: 1,
     influencerImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     category: "Fashion"
   }
@@ -64,10 +71,15 @@ const categories = ["All", "Tech", "Fashion", "Beauty", "Fitness", "Home", "Life
 
 const ProductShowcase = () => {
   const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
   
   const filteredProducts = activeCategory === "All" 
     ? products 
     : products.filter(product => product.category === activeCategory);
+
+  const handleInfluencerClick = (influencerId: number) => {
+    navigate(`/influencer/${influencerId}`);
+  };
 
   return (
     <section className="section bg-white">
@@ -106,7 +118,10 @@ const ProductShowcase = () => {
                   alt={product.name}
                   className="h-64 w-full object-cover"
                 />
-                <div className="absolute top-4 right-4 flex items-center space-x-1 bg-white bg-opacity-90 rounded-full py-1 px-3">
+                <div 
+                  className="absolute top-4 right-4 flex items-center space-x-1 bg-white bg-opacity-90 rounded-full py-1 px-3 cursor-pointer hover:bg-opacity-100"
+                  onClick={() => handleInfluencerClick(product.influencerId)}
+                >
                   <img 
                     src={product.influencerImage} 
                     alt={product.influencer}
@@ -123,7 +138,12 @@ const ProductShowcase = () => {
                     <Link className="h-4 w-4 mr-1" />
                     Shop Now
                   </Button>
-                  <span className="text-sm text-gray-500">{product.category}</span>
+                  <span 
+                    className="text-sm text-gray-500 cursor-pointer hover:text-brand-600 hover:underline"
+                    onClick={() => handleInfluencerClick(product.influencerId)}
+                  >
+                    {product.category}
+                  </span>
                 </div>
               </div>
             </div>

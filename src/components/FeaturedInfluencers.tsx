@@ -1,26 +1,31 @@
 
 import { Avatar } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const influencers = [
   {
+    id: 1,
     name: "Emma Johnson",
     category: "Fashion & Style",
     followers: "1.2M",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
   },
   {
+    id: 2,
     name: "Alex Rivera",
     category: "Fitness & Wellness",
     followers: "850K",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
   },
   {
+    id: 3,
     name: "Sarah Chen",
     category: "Beauty & Skincare",
     followers: "2.3M",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
   },
   {
+    id: 4,
     name: "Marcus Taylor",
     category: "Home & Lifestyle",
     followers: "930K",
@@ -29,6 +34,12 @@ const influencers = [
 ];
 
 const FeaturedInfluencers = () => {
+  const navigate = useNavigate();
+
+  const handleViewCollections = (influencerId: number) => {
+    navigate(`/influencer/${influencerId}`);
+  };
+
   return (
     <section className="section bg-gray-50">
       <div className="container">
@@ -40,8 +51,8 @@ const FeaturedInfluencers = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-10">
-          {influencers.map((influencer, index) => (
-            <div key={index} className="influencer-card group">
+          {influencers.map((influencer) => (
+            <div key={influencer.id} className="influencer-card group">
               <div className="relative">
                 <Avatar className="h-32 w-32 border-4 border-white shadow-md mx-auto mb-4 transition-transform group-hover:scale-105">
                   <img 
@@ -59,7 +70,10 @@ const FeaturedInfluencers = () => {
                 <p className="text-sm text-gray-500">{influencer.category}</p>
               </div>
               <div className="mt-3 text-center">
-                <button className="text-sm text-brand-600 font-medium hover:text-brand-700 hover:underline">
+                <button 
+                  className="text-sm text-brand-600 font-medium hover:text-brand-700 hover:underline"
+                  onClick={() => handleViewCollections(influencer.id)}
+                >
                   View Collections
                 </button>
               </div>
