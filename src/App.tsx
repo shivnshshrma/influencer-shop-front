@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import InfluencerProfile from "./pages/InfluencerProfile";
 import InfluencerTimeline from "./pages/InfluencerTimeline";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/measurements" element={<Profile />} />
           <Route path="/influencer/:id" element={<InfluencerTimeline />} />
+          <Route path="/influencer-profile" element={<InfluencerProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

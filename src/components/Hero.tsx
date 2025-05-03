@@ -1,8 +1,30 @@
 
 import { Button } from "@/components/ui/button";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleJoinAsInfluencer = () => {
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    
+    if (isLoggedIn) {
+      // Redirect to influencer profile page
+      navigate("/influencer-profile");
+    } else {
+      // Show toast to prompt login
+      toast({
+        title: "Login Required",
+        description: "Please login or sign up to join as an influencer.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="relative bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -34,7 +56,13 @@ const Hero = () => {
                   </Button>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                  <Button variant="outline" size="lg" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={handleJoinAsInfluencer}
+                  >
+                    <UserPlus className="mr-2 h-5 w-5" />
                     Join as Influencer
                   </Button>
                 </div>

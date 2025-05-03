@@ -17,6 +17,7 @@ const ProfileButton = () => {
     email: "user@example.com",
     avatar: ""
   });
+  const [isInfluencer, setIsInfluencer] = useState(false);
 
   // Load user data from localStorage when component mounts
   useEffect(() => {
@@ -24,6 +25,8 @@ const ProfileButton = () => {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+    
+    setIsInfluencer(localStorage.getItem("isInfluencer") === "true");
   }, []);
 
   const handleLogout = () => {
@@ -53,6 +56,11 @@ const ProfileButton = () => {
         <DropdownMenuItem onClick={() => navigate("/profile/measurements")}>
           My Measurements
         </DropdownMenuItem>
+        {isInfluencer && (
+          <DropdownMenuItem onClick={() => navigate("/influencer-profile")}>
+            Influencer Dashboard
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleLogout}>
           Logout
         </DropdownMenuItem>

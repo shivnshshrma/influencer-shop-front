@@ -1,8 +1,30 @@
 
 import { Button } from "@/components/ui/button";
 import { User, ShoppingBag, Link } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const HowItWorks = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleJoinAsInfluencer = () => {
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    
+    if (isLoggedIn) {
+      // Redirect to influencer profile page
+      navigate("/influencer-profile");
+    } else {
+      // Show toast to prompt login
+      toast({
+        title: "Login Required",
+        description: "Please login or sign up to join as an influencer.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <section id="how-it-works" className="section">
       <div className="container">
@@ -47,7 +69,9 @@ const HowItWorks = () => {
             </div>
             
             <div className="mt-10 text-center">
-              <Button>Join as Influencer</Button>
+              <Button onClick={handleJoinAsInfluencer}>
+                Join as Influencer
+              </Button>
             </div>
           </div>
           
