@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +51,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Mock user data - in a real app, this would come from your auth system
+  // Initialize with default values to prevent undefined issues
   const [user, setUser] = useState({
     name: "User",
     email: "user@example.com",
@@ -72,7 +71,29 @@ const Profile = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        // Ensure measurements object exists with default values if missing
+        const measurements = parsedUser.measurements || {};
+        
+        setUser({
+          name: parsedUser.name || "User",
+          email: parsedUser.email || "user@example.com",
+          phone: parsedUser.phone || "9876543210",
+          avatar: parsedUser.avatar || "",
+          measurements: {
+            height: measurements.height || "170",
+            chest: measurements.chest || "90",
+            waist: measurements.waist || "75",
+            hips: measurements.hips || "95",
+            shoeSize: measurements.shoeSize || "9",
+            skinTone: measurements.skinTone || "medium",
+          }
+        });
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        // Keep default values in case of error
+      }
     }
   }, []);
 
@@ -103,6 +124,18 @@ const Profile = () => {
       skinTone: user.measurements.skinTone,
     }
   });
+
+  // Update measurements form when user data changes
+  useEffect(() => {
+    if (user.measurements) {
+      measurementsForm.setValue("height", user.measurements.height || "");
+      measurementsForm.setValue("chest", user.measurements.chest || "");
+      measurementsForm.setValue("waist", user.measurements.waist || "");
+      measurementsForm.setValue("hips", user.measurements.hips || "");
+      measurementsForm.setValue("shoeSize", user.measurements.shoeSize || "");
+      measurementsForm.setValue("skinTone", user.measurements.skinTone || "");
+    }
+  }, [user, measurementsForm]);
 
   // Handle avatar upload
   const handleAvatarClick = () => {
@@ -173,6 +206,14 @@ const Profile = () => {
     toast.success("Measurements updated successfully!");
   };
 
+  // Get the first letter safely for the avatar fallback
+  const getInitial = () => {
+    if (user && user.name && typeof user.name === 'string' && user.name.length > 0) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -187,7 +228,7 @@ const Profile = () => {
                 <Avatar className="h-24 w-24">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="bg-brand-600 text-white text-2xl">
-                    {user.name.charAt(0).toUpperCase()}
+                    {getInitial()}
                   </AvatarFallback>
                 </Avatar>
                 {isEditMode && (

@@ -23,7 +23,16 @@ const ProfileButton = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser({
+          name: parsedUser.name || "User",
+          email: parsedUser.email || "user@example.com",
+          avatar: parsedUser.avatar || ""
+        });
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
     }
     
     setIsInfluencer(localStorage.getItem("isInfluencer") === "true");
@@ -33,8 +42,18 @@ const ProfileButton = () => {
     // In a real app, this would clear authentication state
     console.log("Logging out");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("isInfluencer");
+    // Don't remove userData to persist the user profile
     // Redirect to the landing page after logout
     navigate("/");
+  };
+
+  // Get the first letter safely for the avatar fallback
+  const getInitial = () => {
+    if (user && user.name && typeof user.name === 'string' && user.name.length > 0) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    return 'U';
   };
 
   return (
@@ -42,9 +61,9 @@ const ProfileButton = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="rounded-full p-0 h-10 w-10">
           <Avatar>
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={user.avatar} alt={user.name || "User"} />
             <AvatarFallback className="bg-brand-600 text-white">
-              {user.name.charAt(0).toUpperCase()}
+              {getInitial()}
             </AvatarFallback>
           </Avatar>
         </Button>
