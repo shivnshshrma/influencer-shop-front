@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +56,15 @@ const NewPostForm = () => {
   const onSubmit = (data: FormData) => {
     try {
       // Use the utility function to save the post
-      savePost(data);
+      // Fix: Cast data to the expected type since our form validation ensures all fields are present
+      savePost({
+        name: data.name,
+        price: data.price,
+        description: data.description,
+        image: data.image,
+        productLink: data.productLink,
+        type: data.type,
+      });
       
       // Show success message
       toast({
