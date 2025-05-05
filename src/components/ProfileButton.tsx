@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { getUserData, isInfluencer, setLoggedIn } from "@/utils/localStorage";
 
 const ProfileButton = () => {
   const navigate = useNavigate();
@@ -17,32 +18,23 @@ const ProfileButton = () => {
     email: "user@example.com",
     avatar: ""
   });
-  const [isInfluencer, setIsInfluencer] = useState(false);
+  const [userIsInfluencer, setUserIsInfluencer] = useState(false);
 
-  // Load user data from localStorage when component mounts
+  // Load user data using the utility function
   useEffect(() => {
-    const savedUser = localStorage.getItem("userData");
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser({
-          name: parsedUser.name || "User",
-          email: parsedUser.email || "user@example.com",
-          avatar: parsedUser.avatar || ""
-        });
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-      }
-    }
+    const userData = getUserData();
+    setUser({
+      name: userData.name,
+      email: userData.email,
+      avatar: userData.avatar || ""
+    });
     
-    setIsInfluencer(localStorage.getItem("isInfluencer") === "true");
+    setUserIsInfluencer(isInfluencer());
   }, []);
 
   const handleLogout = () => {
-    // In a real app, this would clear authentication state
     console.log("Logging out");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("isInfluencer");
+    setLoggedIn(false);
     // Don't remove userData to persist the user profile
     // Redirect to the landing page after logout
     navigate("/");
@@ -75,7 +67,7 @@ const ProfileButton = () => {
         <DropdownMenuItem onClick={() => navigate("/profile/measurements")}>
           My Measurements
         </DropdownMenuItem>
-        {isInfluencer && (
+        {userIsInfluencer && (
           <DropdownMenuItem onClick={() => navigate("/influencer-profile")}>
             Influencer Dashboard
           </DropdownMenuItem>

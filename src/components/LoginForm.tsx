@@ -7,6 +7,7 @@ import { toast } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { setLoggedIn, saveUserData } from "@/utils/localStorage";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -38,8 +39,14 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       
       toast.success("Logged in successfully!");
       
-      // Set logged in status in localStorage for demo purposes
-      localStorage.setItem("isLoggedIn", "true");
+      // Set logged in status
+      setLoggedIn(true);
+      
+      // Create a mock user or update existing one
+      saveUserData({
+        email: data.email,
+        name: data.email.split('@')[0], // Simple name derived from email
+      });
       
       if (onSuccess) {
         onSuccess();

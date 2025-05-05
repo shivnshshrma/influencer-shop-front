@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Image, Video, Link as LinkIcon } from "lucide-react";
+import { savePost } from "@/utils/localStorage";
 
 const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -53,37 +53,26 @@ const NewPostForm = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    // Get existing posts or initialize empty array
-    const existingPosts = JSON.parse(localStorage.getItem("influencerPosts") || "[]");
-    
-    // Get logged in user data
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    
-    // Create new post with user info and unique ID
-    const newPost = {
-      id: Date.now(),
-      ...data,
-      authorId: userData.id || 1,
-      authorName: userData.name || "User",
-      authorImage: userData.avatar || "",
-      timestamp: new Date().toISOString(),
-    };
-    
-    // Add new post to beginning of array
-    const updatedPosts = [newPost, ...existingPosts];
-    
-    // Save to localStorage
-    localStorage.setItem("influencerPosts", JSON.stringify(updatedPosts));
-    
-    // Show success message
-    toast({
-      title: "Post created!",
-      description: "Your post has been published successfully.",
-    });
-    
-    // Reset form
-    form.reset();
-    setPreviewUrl("");
+    try {
+      // Use the utility function to save the post
+      savePost(data);
+      
+      // Show success message
+      toast({
+        title: "Post created!",
+        description: "Your post has been published successfully.",
+      });
+      
+      // Reset form
+      form.reset();
+      setPreviewUrl("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleImageUrlChange = (value: string) => {

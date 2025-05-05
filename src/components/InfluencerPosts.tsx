@@ -3,57 +3,39 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Post {
-  id: number;
-  name: string;
-  price: string;
-  description: string;
-  image: string;
-  productLink: string;
-  type: 'image' | 'video';
-  authorId: number;
-  authorName: string;
-  authorImage: string;
-  timestamp: string;
-}
+import { getUserData, getPostsByAuthor, deletePost, type Post } from "@/utils/localStorage";
 
 const InfluencerPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const { toast } = useToast();
   
   useEffect(() => {
-    // Load posts from localStorage
-    const storedPosts = JSON.parse(localStorage.getItem("influencerPosts") || "[]");
-    
-    // Get current user data
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    const userId = userData.id || 1;
-    
-    // Filter posts by current user
-    const userPosts = storedPosts.filter((post: Post) => post.authorId === userId);
-    
+    // Load posts for current user
+    const userData = getUserData();
+    const userPosts = getPostsByAuthor(userData.id);
     setPosts(userPosts);
   }, []);
   
   const handleDeletePost = (postId: number) => {
-    // Get all posts
-    const allPosts = JSON.parse(localStorage.getItem("influencerPosts") || "[]");
-    
-    // Filter out the post to delete
-    const updatedPosts = allPosts.filter((post: Post) => post.id !== postId);
-    
-    // Save updated posts back to localStorage
-    localStorage.setItem("influencerPosts", JSON.stringify(updatedPosts));
-    
-    // Update state
-    setPosts(posts.filter(post => post.id !== postId));
-    
-    // Show success message
-    toast({
-      title: "Post deleted",
-      description: "Your post has been removed successfully.",
-    });
+    try {
+      // Delete post using utility function
+      deletePost(postId);
+      
+      // Update state
+      setPosts(posts.filter(post => post.id !== postId));
+      
+      // Show success message
+      toast({
+        title: "Post deleted",
+        description: "Your post has been removed successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   const formatDate = (dateString: string) => {
