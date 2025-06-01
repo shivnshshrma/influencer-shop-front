@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "lucide-react";
@@ -8,7 +7,7 @@ const products = [
   {
     id: 1,
     name: "Wireless Noise-Cancelling Headphones",
-    price: "$249",
+    price: "₹20,699",
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
     influencer: "Emma Johnson",
     influencerId: 1,
@@ -18,7 +17,7 @@ const products = [
   {
     id: 2,
     name: "Premium Yoga Mat",
-    price: "$89",
+    price: "₹7,399",
     image: "https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
     influencer: "Alex Rivera",
     influencerId: 2,
@@ -28,7 +27,7 @@ const products = [
   {
     id: 3,
     name: "Hydrating Facial Serum",
-    price: "$58",
+    price: "₹4,819",
     image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1912&q=80",
     influencer: "Sarah Chen",
     influencerId: 3,
@@ -38,7 +37,7 @@ const products = [
   {
     id: 4,
     name: "Smart Home Assistant",
-    price: "$129",
+    price: "₹10,719",
     image: "https://images.unsplash.com/photo-1558089687-f282ffcbc0d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1925&q=80",
     influencer: "Marcus Taylor",
     influencerId: 4,
@@ -48,7 +47,7 @@ const products = [
   {
     id: 5,
     name: "Sustainable Water Bottle",
-    price: "$35",
+    price: "₹2,909",
     image: "https://images.unsplash.com/photo-1606767041004-6b387b91e360?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80",
     influencer: "Alex Rivera",
     influencerId: 2,
@@ -58,7 +57,7 @@ const products = [
   {
     id: 6,
     name: "Designer Sunglasses",
-    price: "$175",
+    price: "₹14,539",
     image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80",
     influencer: "Emma Johnson",
     influencerId: 1,

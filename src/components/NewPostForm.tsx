@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -115,7 +114,7 @@ const NewPostForm = () => {
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input placeholder="$99.99" {...field} />
+                    <Input placeholder="₹8,299" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
