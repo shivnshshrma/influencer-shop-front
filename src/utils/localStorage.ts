@@ -1,4 +1,3 @@
-
 /**
  * LocalStorage utility functions for managing application data
  */
@@ -130,6 +129,69 @@ export const setInfluencer = (status: boolean): void => {
     ...userData,
     isInfluencer: status
   });
+};
+
+// Wishlist related types and functions
+export interface WishlistItem {
+  id: number;
+  name: string;
+  price: string;
+  image: string;
+  category?: string;
+  influencer?: string;
+  influencerId?: number;
+  influencerImage?: string;
+}
+
+/**
+ * Get all wishlist items
+ */
+export const getWishlistItems = (): WishlistItem[] => {
+  try {
+    const items = localStorage.getItem("wishlistItems");
+    return items ? JSON.parse(items) : [];
+  } catch (error) {
+    console.error("Error retrieving wishlist items:", error);
+    return [];
+  }
+};
+
+/**
+ * Add item to wishlist
+ */
+export const addToWishlist = (item: WishlistItem): void => {
+  try {
+    const currentItems = getWishlistItems();
+    const isAlreadyInWishlist = currentItems.some(wishlistItem => wishlistItem.id === item.id);
+    
+    if (!isAlreadyInWishlist) {
+      const updatedItems = [...currentItems, item];
+      localStorage.setItem("wishlistItems", JSON.stringify(updatedItems));
+    }
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+  }
+};
+
+/**
+ * Remove item from wishlist
+ */
+export const removeFromWishlist = (itemId: number): void => {
+  try {
+    const currentItems = getWishlistItems();
+    const updatedItems = currentItems.filter(item => item.id !== itemId);
+    localStorage.setItem("wishlistItems", JSON.stringify(updatedItems));
+  } catch (error) {
+    console.error("Error removing from wishlist:", error);
+  }
+};
+
+/**
+ * Check if item is in wishlist
+ */
+export const isInWishlist = (itemId: number): boolean => {
+  const wishlistItems = getWishlistItems();
+  return wishlistItems.some(item => item.id === itemId);
 };
 
 // Post related types and functions

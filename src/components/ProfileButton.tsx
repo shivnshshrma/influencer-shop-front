@@ -64,6 +64,9 @@ const ProfileButton = () => {
         <DropdownMenuItem onClick={() => navigate("/profile")}>
           Profile
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/wishlist")}>
+          Wishlist
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/profile/measurements")}>
           My Measurements
         </DropdownMenuItem>

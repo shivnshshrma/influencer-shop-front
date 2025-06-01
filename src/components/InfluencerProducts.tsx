@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Video } from "lucide-react";
+import WishlistButton from "./WishlistButton";
 
 interface Product {
   id: number;
@@ -70,10 +70,20 @@ const InfluencerProducts = ({ products }: InfluencerProductsProps) => {
               <div className="p-4">
                 <h3 className="font-medium text-gray-900">{product.name}</h3>
                 <p className="text-gray-600 mt-2 text-sm line-clamp-2">{product.description}</p>
-                <div className="mt-4">
+                <div className="mt-4 flex justify-between items-center">
                   <Button size="sm" variant={product.type === "video" ? "secondary" : "default"}>
                     {product.type === "video" ? "Watch Review" : "Shop Now"}
                   </Button>
+                  <WishlistButton 
+                    item={{
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image
+                    }}
+                    size="icon"
+                    variant="ghost"
+                  />
                 </div>
               </div>
             </div>

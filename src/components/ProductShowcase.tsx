@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import WishlistButton from "./WishlistButton";
 
 const products = [
   {
@@ -133,10 +134,26 @@ const ProductShowcase = () => {
                 <h3 className="font-medium text-gray-900">{product.name}</h3>
                 <p className="text-lg font-semibold text-brand-600 mt-1">{product.price}</p>
                 <div className="mt-4 flex justify-between items-center">
-                  <Button size="sm" variant="outline" className="flex items-center">
-                    <Link className="h-4 w-4 mr-1" />
-                    Shop Now
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="flex items-center">
+                      <Link className="h-4 w-4 mr-1" />
+                      Shop Now
+                    </Button>
+                    <WishlistButton 
+                      item={{
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                        category: product.category,
+                        influencer: product.influencer,
+                        influencerId: product.influencerId,
+                        influencerImage: product.influencerImage
+                      }}
+                      size="icon"
+                      variant="ghost"
+                    />
+                  </div>
                   <span 
                     className="text-sm text-gray-500 cursor-pointer hover:text-brand-600 hover:underline"
                     onClick={() => handleInfluencerClick(product.influencerId)}
