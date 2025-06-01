@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +23,7 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ProfileButton from "./ProfileButton";
 import AIChatRoom from "./AIChatRoom";
+import DarkModeToggle from "./DarkModeToggle";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,12 +51,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <a href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-brand-700">InfluStyle</span>
+              <span className="text-2xl font-bold text-brand-700 dark:text-brand-400">InfluStyle</span>
             </a>
           </div>
           
@@ -68,16 +68,17 @@ const Navbar = () => {
                 </div>
                 <Input 
                   placeholder="Search products, influencers..."
-                  className="pl-10 bg-gray-50"
+                  className="pl-10 bg-gray-50 dark:bg-gray-800"
                   onClick={() => setIsSearchOpen(true)}
                   readOnly
                 />
               </div>
               <AIChatRoom />
+              <DarkModeToggle />
             </div>
-            <a href="#how-it-works" className="text-gray-700 hover:text-brand-600">How It Works</a>
-            <a href="#for-influencers" className="text-gray-700 hover:text-brand-600">For Influencers</a>
-            <a href="#for-shoppers" className="text-gray-700 hover:text-brand-600">For Shoppers</a>
+            <a href="#how-it-works" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400">How It Works</a>
+            <a href="#for-influencers" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400">For Influencers</a>
+            <a href="#for-shoppers" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400">For Shoppers</a>
             
             {isLoggedIn ? (
               <ProfileButton />
@@ -121,15 +122,16 @@ const Navbar = () => {
           </div>
           
           <div className="md:hidden flex items-center space-x-3">
+            <DarkModeToggle />
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 rounded-full hover:bg-gray-100"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Search className="h-5 w-5 text-gray-700" />
+              <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
@@ -146,7 +148,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-900 shadow-lg">
             <div className="px-3 py-2">
               <div className="relative mb-3">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -154,20 +156,20 @@ const Navbar = () => {
                 </div>
                 <Input 
                   placeholder="Search products, influencers..." 
-                  className="pl-10 w-full bg-gray-50"
+                  className="pl-10 w-full bg-gray-50 dark:bg-gray-800"
                   onClick={() => setIsSearchOpen(true)}
                   readOnly
                 />
               </div>
               <AIChatRoom />
             </div>
-            <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50">
               How It Works
             </a>
-            <a href="#for-influencers" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <a href="#for-influencers" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50">
               For Influencers
             </a>
-            <a href="#for-shoppers" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <a href="#for-shoppers" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50">
               For Shoppers
             </a>
             <div className="mt-4 space-y-2 px-3">
@@ -243,7 +245,7 @@ const Navbar = () => {
               </CommandItem>
               <CommandItem className="flex items-center gap-2 py-3">
                 <img 
-                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" 
+                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
                   alt="Yoga Mat" 
                   className="w-10 h-10 object-cover rounded"
                 />
