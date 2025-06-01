@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ import {
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ProfileButton from "./ProfileButton";
+import AIChatRoom from "./AIChatRoom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,16 +61,19 @@ const Navbar = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-6">
-            <div className="relative w-64">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+            <div className="flex items-center space-x-3">
+              <div className="relative w-64">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <Input 
+                  placeholder="Search products, influencers..."
+                  className="pl-10 bg-gray-50"
+                  onClick={() => setIsSearchOpen(true)}
+                  readOnly
+                />
               </div>
-              <Input 
-                placeholder="Search products, influencers..."
-                className="pl-10 bg-gray-50"
-                onClick={() => setIsSearchOpen(true)}
-                readOnly
-              />
+              <AIChatRoom />
             </div>
             <a href="#how-it-works" className="text-gray-700 hover:text-brand-600">How It Works</a>
             <a href="#for-influencers" className="text-gray-700 hover:text-brand-600">For Influencers</a>
@@ -143,7 +148,7 @@ const Navbar = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg">
             <div className="px-3 py-2">
-              <div className="relative">
+              <div className="relative mb-3">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Search className="h-4 w-4 text-gray-400" />
                 </div>
@@ -154,6 +159,7 @@ const Navbar = () => {
                   readOnly
                 />
               </div>
+              <AIChatRoom />
             </div>
             <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
               How It Works
