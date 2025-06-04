@@ -45,6 +45,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand colors for compatibility */
+    --brand-600: 267 100% 50%;
+    --brand-700: 267 100% 45%;
+    --brand-400: 267 100% 65%;
   }
 
   .dark {
@@ -83,6 +88,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand colors for dark mode compatibility */
+    --brand-600: 267 100% 60%;
+    --brand-700: 267 100% 55%;
+    --brand-400: 267 100% 70%;
   }
 }
 
@@ -102,7 +112,7 @@
 }
 
 .product-card {
-  @apply flex flex-col rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg;
+  @apply flex flex-col rounded-lg overflow-hidden border border-border bg-card transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg;
 }
 
 .influencer-card {
