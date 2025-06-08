@@ -24,7 +24,6 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import ProfileButton from "./ProfileButton";
 import AIChatRoom from "./AIChatRoom";
-import DarkModeToggle from "./DarkModeToggle";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,7 +74,6 @@ const Navbar = () => {
                 />
               </div>
               <AIChatRoom />
-              <DarkModeToggle />
             </div>
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">How It Works</a>
             <a href="#for-influencers" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">For Influencers</a>
@@ -123,7 +121,6 @@ const Navbar = () => {
           </div>
           
           <div className="md:hidden flex items-center space-x-3">
-            <DarkModeToggle />
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 rounded-full hover:bg-accent text-foreground"
