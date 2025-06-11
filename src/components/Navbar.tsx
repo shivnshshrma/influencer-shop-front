@@ -56,7 +56,10 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <a href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-brand-700 dark:text-brand-400">InfluStyle</span>
+              <span className="text-2xl font-bold">
+                <span className="text-brand-600 dark:text-brand-400">influ</span>
+                <span className="text-white">style</span>
+              </span>
             </a>
           </div>
           
