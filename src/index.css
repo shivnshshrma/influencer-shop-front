@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 330 81% 80%;
+    --primary: 330 81% 65%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -32,7 +32,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 330 81% 80%;
+    --ring: 330 81% 65%;
 
     --radius: 0.5rem;
 
@@ -43,12 +43,12 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 330 81% 80%;
+    --sidebar-ring: 330 81% 65%;
 
-    /* Brand colors - updated to light pink */
-    --brand-600: 330 81% 80%;
-    --brand-700: 330 81% 70%;
-    --brand-400: 330 81% 85%;
+    /* Brand colors - darker light pink for better visibility */
+    --brand-600: 330 81% 65%;
+    --brand-700: 330 81% 55%;
+    --brand-400: 330 81% 75%;
   }
 
   .dark {
@@ -61,7 +61,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 330 81% 85%;
+    --primary: 330 81% 75%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -81,17 +81,17 @@
     --ring: 212.7 26.8% 83.9%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 330 81% 80%;
+    --sidebar-primary: 330 81% 75%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 330 81% 80%;
+    --sidebar-ring: 330 81% 75%;
 
-    /* Brand colors for dark mode - updated to light pink */
-    --brand-600: 330 81% 85%;
-    --brand-700: 330 81% 80%;
-    --brand-400: 330 81% 90%;
+    /* Brand colors for dark mode - darker light pink for better visibility */
+    --brand-600: 330 81% 75%;
+    --brand-700: 330 81% 65%;
+    --brand-400: 330 81% 85%;
   }
 }
 
