@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,8 +78,6 @@ const Navbar = () => {
               <AIChatRoom />
             </div>
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">How It Works</a>
-            <a href="#for-influencers" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">For Influencers</a>
-            <a href="#for-shoppers" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">For Shoppers</a>
             
             {isLoggedIn ? (
               <ProfileButton />
@@ -166,12 +163,6 @@ const Navbar = () => {
             </div>
             <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent">
               How It Works
-            </a>
-            <a href="#for-influencers" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent">
-              For Influencers
-            </a>
-            <a href="#for-shoppers" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent">
-              For Shoppers
             </a>
             <div className="mt-4 space-y-2 px-3">
               {isLoggedIn ? (
