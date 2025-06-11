@@ -58,7 +58,7 @@ const Navbar = () => {
             <a href="/" className="flex items-center">
               <span className="text-2xl font-bold">
                 <span className="text-brand-600 dark:text-brand-400">influ</span>
-                <span className="text-white">style</span>
+                <span className="text-black">style</span>
               </span>
             </a>
           </div>
