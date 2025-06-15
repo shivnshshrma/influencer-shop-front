@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import MeasurementGuide from "../components/MeasurementGuide";
 import Navbar from "../components/Navbar";
+import BodyTypeSelectWithImage from "../components/BodyTypeSelectWithImage";
 
 // Profile form schema
 const profileSchema = z.object({
@@ -399,6 +400,11 @@ const Profile = () => {
                               {...field}
                               disabled={!isEditMode}
                               className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
+                              onChange={e => {
+                                field.onChange(e); // update form
+                                // reset body type value if gender changes
+                                profileForm.setValue("bodyType", "");
+                              }}
                             >
                               <option value="">Select Gender</option>
                               <option value="male">Male</option>
@@ -411,7 +417,7 @@ const Profile = () => {
                     )}
                   />
 
-                  {/* ----- Body Type (new) ----- */}
+                  {/* ----- Body Type (with image, filtered by gender) ----- */}
                   <FormField
                     control={profileForm.control}
                     name="bodyType"
@@ -419,15 +425,12 @@ const Profile = () => {
                       <FormItem>
                         <FormLabel>Body Type</FormLabel>
                         <FormControl>
-                          <select
-                            {...field}
+                          <BodyTypeSelectWithImage
+                            value={field.value || ""}
+                            gender={profileForm.watch("gender")}
+                            onChange={val => field.onChange(val)}
                             disabled={!isEditMode}
-                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
-                          >
-                            {bodyTypeOptions.map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
