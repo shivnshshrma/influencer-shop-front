@@ -41,7 +41,7 @@ const influencerDatabase = [
             image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=500&q=80",
             link: "#"
           },
-        ]
+        ],
       },
       {
         id: 6,
@@ -54,13 +54,13 @@ const influencerDatabase = [
             image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80",
             link: "#"
           }
-        ]
+        ],
       },
       {
         id: 7,
         image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80",
         caption: "Summer Collection Review: My faves of the season.",
-        shopItems: []
+        shopItems: [],
       },
     ],
   },
@@ -74,16 +74,19 @@ const influencerDatabase = [
         id: 2,
         image: "https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
         caption: "My daily yoga mat pick for pro grip.",
+        shopItems: [],
       },
       {
         id: 5,
         image: "https://images.unsplash.com/photo-1606767041004-6b387b91e360?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1887&q=80",
         caption: "Eco water bottle—hydrate, stay fit!",
+        shopItems: [],
       },
       {
         id: 8,
         image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
         caption: "Home workout essentials, my top picks.",
+        shopItems: [],
       },
     ],
   },
@@ -97,11 +100,13 @@ const influencerDatabase = [
         id: 3,
         image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1912&q=80",
         caption: "Hydrating facial serum for radiant skin 💧",
+        shopItems: [],
       },
       {
         id: 9,
         image: "https://images.unsplash.com/photo-1576426863848-c21f53c60b19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
         caption: "My AM skincare routine for a glow up!",
+        shopItems: [],
       },
     ],
   },
@@ -115,11 +120,13 @@ const influencerDatabase = [
         id: 4,
         image: "https://images.unsplash.com/photo-1558089687-f282ffcbc0d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1925&q=80",
         caption: "Smart home assistant: organize life, hands-free.",
+        shopItems: [],
       },
       {
         id: 10,
         image: "https://images.unsplash.com/photo-1585842630354-448fe6ccbef8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
         caption: "My home office starter kit! #StayProductive",
+        shopItems: [],
       },
     ],
   },
