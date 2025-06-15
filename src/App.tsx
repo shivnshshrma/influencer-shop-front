@@ -17,6 +17,7 @@ import Categories from "./pages/Categories";
 import Shop from "./pages/Shop";
 import PostDetails from "./pages/PostDetails";
 import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/post/:id" element={<PostDetails />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
