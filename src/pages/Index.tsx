@@ -12,29 +12,29 @@ import { useNavigate } from "react-router-dom";
 
 const productIcons = [
   {
-    src: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=96&q=80",
-    alt: "Black and brown round fruit",
-    label: "Organic Fruits",
+    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=96&q=80",
+    alt: "Assorted stylish women's tops",
+    label: "Tops",
   },
   {
-    src: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=96&q=80",
-    alt: "Orange and white tabby cat",
-    label: "Pet Accessories",
+    src: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=96&q=80",
+    alt: "Woman wearing a skirt",
+    label: "Skirts",
   },
   {
-    src: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?auto=format&fit=crop&w=96&q=80",
-    alt: "Grey tabby kitten",
-    label: "Toys",
+    src: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=96&q=80",
+    alt: "Woman in a jacket",
+    label: "Jackets",
   },
   {
-    src: "https://images.unsplash.com/photo-1493962853295-0fd70327578a?auto=format&fit=crop&w=96&q=80",
-    alt: "Brown ox on mountain",
-    label: "Outdoors",
+    src: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=96&q=80",
+    alt: "Makeup and dress",
+    label: "Dresses",
   },
   {
-    src: "https://images.unsplash.com/photo-1501286353178-1ec881214838?auto=format&fit=crop&w=96&q=80",
-    alt: "Monkey holding banana",
-    label: "Fun Stuff",
+    src: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=96&q=80",
+    alt: "Woman in jeans",
+    label: "Jeans",
   },
 ];
 
