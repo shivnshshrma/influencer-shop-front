@@ -1,19 +1,22 @@
 
-// This component now supports image or video (one file only), and is called MediaUploadGallery.
-
 import React, { useRef } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MediaUploadGalleryProps {
-  value: string | undefined;
-  onChange: (url: string) => void;
+  value: string[] | undefined;
+  onChange: (urls: string[]) => void;
   sampleMedia?: string[];
-  maxFiles?: number; // default 10, just for UI
+  maxFiles?: number;
 }
 
+// Helper: is video by url?
+const isVideoUrl = (url: string) =>
+  /\.(mp4|webm|ogg)$/i.test(url) ||
+  (url.startsWith("blob:") && url.includes("video"));
+
 const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
-  value,
+  value = [],
   onChange,
   sampleMedia = [],
   maxFiles = 10,
@@ -22,9 +25,17 @@ const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const url = URL.createObjectURL(file);
-    onChange(url);
+    const files = Array.from(e.target.files);
+    // Only allow up to maxFiles
+    const existingCount = value.length;
+    const allowedCount = Math.max(0, maxFiles - existingCount);
+    const selectedFiles = files.slice(0, allowedCount);
+
+    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+    // Add to existing value (for incremental uploads)
+    onChange([...value, ...urls]);
+    // Reset input value so the same file can be selected again if desired
+    e.target.value = "";
   };
 
   const handleUploadClick = () => {
@@ -32,23 +43,20 @@ const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
   };
 
   const handleSampleClick = (url: string) => {
-    onChange(url);
-  };
-
-  const handleRemove = () => {
-    if (value && value.startsWith("blob:")) {
-      // Only revoke created local blob URLs
-      URL.revokeObjectURL(value);
+    // Avoid duplicates
+    if (value.includes(url)) return;
+    if (value.length < maxFiles) {
+      onChange([...value, url]);
     }
-    onChange("");
   };
 
-  // Helper: is video file?
-  const isVideo = value
-    ? value.startsWith("blob:") && value.includes("video")
-      ? true
-      : /\.(mp4|webm|ogg)$/.test(value)
-    : false;
+  const handleRemove = (removeUrl: string) => {
+    // If blob, revoke object URL
+    if (removeUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(removeUrl);
+    }
+    onChange(value.filter((url) => url !== removeUrl));
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -60,19 +68,18 @@ const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
           className="flex gap-2 items-center"
         >
           <Upload size={20} />
-          Upload Image or Video
+          Upload Images or Videos
         </Button>
         <input
           type="file"
-          // Accept both images and video
           accept="image/*,video/*"
-          multiple={false}
+          multiple
           className="hidden"
           ref={fileInputRef}
           onChange={handleFileChange}
         />
         <span className="text-sm text-muted-foreground">
-          (Choose one image or video to upload, or pick a sample below)
+          (Choose up to {maxFiles} images or videos, or pick a sample below)
         </span>
       </div>
       {sampleMedia.length > 0 && (
@@ -83,8 +90,9 @@ const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
               type="button"
               className="border rounded-md p-1 hover:border-brand-600 transition-colors"
               onClick={() => handleSampleClick(url)}
+              disabled={value.includes(url) || value.length >= maxFiles}
             >
-              {/\.(mp4|webm|ogg)$/.test(url) ? (
+              {isVideoUrl(url) ? (
                 <video
                   src={url}
                   className="h-10 w-10 object-cover"
@@ -103,29 +111,33 @@ const MediaUploadGallery: React.FC<MediaUploadGalleryProps> = ({
           ))}
         </div>
       )}
-      {value && (
-        <div className="mt-2 relative w-32 h-32">
-          {isVideo ? (
-            <video
-              src={value}
-              controls
-              className="object-cover w-full h-full border rounded"
-            />
-          ) : (
-            <img
-              src={value}
-              alt="Uploaded"
-              className="object-cover w-full h-full border rounded"
-            />
-          )}
-          <button
-            className="absolute top-1 right-1 text-xs rounded-full bg-red-500 text-white px-2 py-0.5 opacity-80 hover:opacity-100"
-            type="button"
-            title="Remove"
-            onClick={handleRemove}
-          >
-            ×
-          </button>
+      {value.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-3">
+          {value.map((url, idx) => (
+            <div className="relative w-32 h-32" key={idx}>
+              {isVideoUrl(url) ? (
+                <video
+                  src={url}
+                  controls
+                  className="object-cover w-full h-full border rounded"
+                />
+              ) : (
+                <img
+                  src={url}
+                  alt={`Uploaded ${idx + 1}`}
+                  className="object-cover w-full h-full border rounded"
+                />
+              )}
+              <button
+                className="absolute top-1 right-1 text-xs rounded-full bg-red-500 text-white px-2 py-0.5 opacity-80 hover:opacity-100"
+                type="button"
+                title="Remove"
+                onClick={() => handleRemove(url)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
