@@ -1,4 +1,3 @@
-
 import { Avatar } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 
@@ -42,6 +41,10 @@ const FeaturedInfluencers = () => {
 
   const handleInfluencerClick = (influencerId: number) => {
     navigate(`/influencer/${influencerId}`);
+  };
+
+  const handleViewAllInfluencers = () => {
+    navigate("/influencers");
   };
 
   return (
@@ -89,7 +92,10 @@ const FeaturedInfluencers = () => {
         </div>
         
         <div className="text-center mt-12">
-          <button className="text-brand-600 font-medium hover:text-brand-700 hover:underline text-lg">
+          <button
+            className="text-brand-600 font-medium hover:text-brand-700 hover:underline text-lg"
+            onClick={handleViewAllInfluencers}
+          >
             View All Influencers
           </button>
         </div>

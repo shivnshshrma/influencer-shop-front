@@ -12,6 +12,7 @@ import InfluencerTimeline from "./pages/InfluencerTimeline";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ForYou from "./pages/ForYou";
+import AllInfluencers from "./pages/AllInfluencers";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/influencer/:id" element={<InfluencerTimeline />} />
             <Route path="/influencer-profile" element={<InfluencerProfile />} />
+            <Route path="/influencers" element={<AllInfluencers />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
