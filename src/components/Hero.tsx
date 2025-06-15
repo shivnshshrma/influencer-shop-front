@@ -1,39 +1,31 @@
 
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, UserPlus } from "lucide-react";
+import { ShoppingBag, UserPlus, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const navigate = useNavigate();
 
   const handleJoinAsInfluencer = () => {
-    // Check if user is logged in
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    
     if (isLoggedIn) {
-      // Redirect to influencer profile page
       navigate("/influencer-profile");
     } else {
-      // Redirect to auth page with influencer intent
       navigate("/auth?intent=influencer");
     }
   };
 
   const handleStartShopping = () => {
-    // Check if user is logged in
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    
     if (isLoggedIn) {
-      // Redirect to personalized For You page
       navigate("/for-you");
     } else {
-      // Redirect to auth page with shopping intent
       navigate("/auth?intent=shopping");
     }
   };
 
   return (
-    <div className="relative bg-white overflow-hidden">
+    <div className="relative bg-white pt-4 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
           <svg
@@ -45,17 +37,21 @@ const Hero = () => {
           >
             <polygon points="50,0 100,0 50,100 0,100" />
           </svg>
-
-          <main className="pt-10 mx-auto max-w-7xl px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
+          <main className="pt-8 mx-auto max-w-7xl px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
             <div className="sm:text-center lg:text-left">
-              <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                <span className="block xl:inline">Discover Products From</span>{" "}
-                <span className="block text-brand-600 xl:inline">Your Favorite Influencers</span>
+              <span className="inline-flex items-center mb-3 text-brand-700/90 font-semibold">
+                <Sparkles className="h-5 w-5 mr-1" />
+                <span>India’s most personal style destination</span>
+              </span>
+              <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl font-playfair">
+                <span className="block xl:inline">Discover Styles Curated</span>{" "}
+                <span className="block text-brand-600 xl:inline">for You, by India’s Top Influencers</span>
               </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                Shop directly from the recommendations of top social media influencers. Find authentic products that are truly loved and tested by the creators you trust.
+              <p className="mt-4 text-base text-gray-600 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-6 md:text-xl lg:mx-0 font-medium">
+                Shop fashion, beauty, and lifestyle picks tailored to your body and skin tone.<br className="hidden sm:block" />
+                Let AI and India’s creators help you find your new wardrobe essentials for any season!
               </p>
-              <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+              <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-3">
                 <div className="rounded-md shadow">
                   <Button 
                     size="lg" 
@@ -63,7 +59,7 @@ const Hero = () => {
                     onClick={handleStartShopping}
                   >
                     <ShoppingBag className="mr-2 h-5 w-5" />
-                    Start Shopping
+                    Personalize Your Feed
                   </Button>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
@@ -78,15 +74,26 @@ const Hero = () => {
                   </Button>
                 </div>
               </div>
+              <div className="mt-6 flex flex-col items-start gap-2 sm:items-center sm:flex-row">
+                <span className="inline-block px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold animate-fade-in">
+                  AI-Driven Recommendations
+                </span>
+                <span className="inline-block px-3 py-1 rounded-full bg-brand-50 text-brand-500 text-xs font-semibold animate-fade-in">
+                  Suits Indian Body & Style
+                </span>
+                <span className="inline-block px-3 py-1 rounded-full bg-pink-50 text-pink-400 text-xs font-semibold animate-fade-in">
+                  Exclusive Influencer Picks
+                </span>
+              </div>
             </div>
           </main>
         </div>
       </div>
       <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
         <img
-          className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-          alt="Person using phone with shopping app"
+          className="h-64 w-full object-cover sm:h-80 md:h-[27rem] lg:w-full lg:h-full rounded-bl-3xl"
+          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80"
+          alt="Indian fashion influencer holding clothes shopping bags"
         />
       </div>
     </div>
