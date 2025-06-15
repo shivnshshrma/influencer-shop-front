@@ -26,6 +26,7 @@ import {
 import MeasurementGuide from "../components/MeasurementGuide";
 import Navbar from "../components/Navbar";
 import BodyTypeSelectWithImage from "../components/BodyTypeSelectWithImage";
+import BodyTypeUserGuide from "../components/BodyTypeUserGuide";
 
 // Profile form schema
 const profileSchema = z.object({
@@ -97,31 +98,30 @@ const colorSeasonOptions = [
   { value: "winter", label: "Winter (cool, intense, deep)" }
 ];
 
+type UserType = {
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  gender: Gender;
+  bodyType?: BodyType;
+  stylePreference?: StylePreference;
+  colorSeason?: ColorSeason;
+  notes?: string;
+  measurements: {
+    height: string;
+    chest: string;
+    waist: string;
+    hips: string;
+    shoeSize: string;
+    skinTone: string;
+  }
+};
+
 const Profile = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Define user type to enforce gender is always "male" or "female"
-  type UserType = {
-    name: string;
-    email: string;
-    phone: string;
-    avatar: string;
-    gender: Gender;
-    bodyType?: BodyType;
-    stylePreference?: StylePreference;
-    colorSeason?: ColorSeason;
-    notes?: string;
-    measurements: {
-      height: string;
-      chest: string;
-      waist: string;
-      hips: string;
-      shoeSize: string;
-      skinTone: string;
-    }
-  };
 
   // Helper to sanitize gender from localStorage
   const sanitizeGender = (raw: any): Gender => {
@@ -687,6 +687,7 @@ const Profile = () => {
           </Tabs>
         </div>
       </div>
+      <BodyTypeUserGuide />
     </div>
   );
 };
