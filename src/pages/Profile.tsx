@@ -27,6 +27,7 @@ import MeasurementGuide from "../components/MeasurementGuide";
 import Navbar from "../components/Navbar";
 import BodyTypeSelectWithImage from "../components/BodyTypeSelectWithImage";
 import BodyTypeUserGuide from "../components/BodyTypeUserGuide";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Profile form schema
 const profileSchema = z.object({
@@ -346,12 +347,27 @@ const Profile = () => {
                 <h1 className="text-2xl font-bold">{user.name}</h1>
                 <p className="text-gray-500">{user.email}</p>
               </div>
-              <Button 
-                onClick={() => setIsEditMode(!isEditMode)}
-                variant={isEditMode ? "outline" : "default"}
-              >
-                {isEditMode ? "Cancel" : "Edit Profile"}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button 
+                        onClick={() => setIsEditMode(!isEditMode)}
+                        variant={isEditMode ? "outline" : "default"}
+                        disabled={activeTab === "measurements"}
+                        className={activeTab === "measurements" ? "cursor-not-allowed opacity-60" : ""}
+                      >
+                        {isEditMode ? "Cancel" : "Edit Profile"}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {activeTab === "measurements" && (
+                    <TooltipContent>
+                      Switch to the Profile tab to edit your details.
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
 
