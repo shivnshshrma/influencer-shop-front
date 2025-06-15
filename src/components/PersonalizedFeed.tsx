@@ -5,59 +5,105 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, ShoppingBag, TrendingUp, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "@/utils/localStorage";
+
+// Utility function to match recommendations by profile
+function getPersonalizedRecommendations(user) {
+  // Example: return products by skinTone, height, style, etc.
+  if (!user?.measurements) return { influencers: [], products: [] };
+  const { skinTone, height } = user.measurements;
+
+  // This could be dynamic: here we filter by example skin tone and mock logic
+  const influencers = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      category: "Fashion",
+      followers: "125K",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      reason: `Great for ${skinTone || "all"} skin tones`,
+    },
+    {
+      id: 2,
+      name: "Mike Chen",
+      category: "Fitness",
+      followers: "89K",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      reason: height && Number(height) > 175 ? "Tall-fit specialist" : "Fitness for all heights",
+    },
+    {
+      id: 3,
+      name: "Emma Davis",
+      category: "Beauty",
+      followers: "234K",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      reason: "Popular in your area",
+    },
+  ];
+
+  // Example: filter products
+  const products = [
+    {
+      id: 1,
+      name: "Wireless Earbuds Pro",
+      price: "₹8,999",
+      image: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=200&h=200&fit=crop",
+      influencer: "Sarah Johnson",
+      category: "Tech",
+      skinTones: ["fair", "medium", "olive", "dark"],
+      recommendedHeights: [150, 180],
+    },
+    {
+      id: 2,
+      name: "Organic Face Serum",
+      price: "₹2,499",
+      image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop",
+      influencer: "Emma Davis",
+      category: "Beauty",
+      skinTones: ["light", "medium", "olive"],
+      recommendedHeights: [],
+    },
+    {
+      id: 3,
+      name: "TallFit Jeans",
+      price: "₹2,199",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
+      influencer: "Mike Chen",
+      category: "Fashion",
+      skinTones: ["all"],
+      recommendedHeights: [175, 190],
+    },
+  ];
+
+  // Personalized filter (very simplified for demo)
+  const matchedProducts = products.filter(
+    (p) =>
+      (!p.skinTones || p.skinTones.includes(skinTone) || p.skinTones.includes("all")) &&
+      (!p.recommendedHeights ||
+        p.recommendedHeights.length === 0 ||
+        (height && p.recommendedHeights.some((h) => Math.abs(Number(height) - h) < 8)))
+  );
+
+  return { influencers, products: matchedProducts };
+}
+
 const PersonalizedFeed = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [showProfileHint, setShowProfileHint] = useState(false);
+
   useEffect(() => {
     const userData = getUserData();
     setUser(userData);
+    // If no measurements, we show a friendly hint to complete profile
+    if (!userData?.measurements?.height || !userData?.measurements?.skinTone) {
+      setShowProfileHint(true);
+    }
   }, []);
 
-  // Mock data for personalized recommendations
-  const recommendedInfluencers = [{
-    id: 1,
-    name: "Sarah Johnson",
-    category: "Fashion",
-    followers: "125K",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    reason: "Matches your style preferences"
-  }, {
-    id: 2,
-    name: "Mike Chen",
-    category: "Fitness",
-    followers: "89K",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    reason: "Based on your fitness goals"
-  }, {
-    id: 3,
-    name: "Emma Davis",
-    category: "Beauty",
-    followers: "234K",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    reason: "Popular in your area"
-  }];
-  const recommendedProducts = [{
-    id: 1,
-    name: "Wireless Earbuds Pro",
-    price: "₹8,999",
-    image: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=200&h=200&fit=crop",
-    influencer: "Sarah Johnson",
-    category: "Tech"
-  }, {
-    id: 2,
-    name: "Organic Face Serum",
-    price: "₹2,499",
-    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop",
-    influencer: "Emma Davis",
-    category: "Beauty"
-  }, {
-    id: 3,
-    name: "Running Shoes",
-    price: "₹12,999",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
-    influencer: "Mike Chen",
-    category: "Fitness"
-  }];
+  // Personalized recommendations using user measurements
+  const { influencers: recommendedInfluencers, products: recommendedProducts } =
+    getPersonalizedRecommendations(user);
+
   const followedPosts = [{
     id: 1,
     influencer: "Sarah Johnson",
@@ -73,7 +119,18 @@ const PersonalizedFeed = () => {
     likes: 892,
     timeAgo: "4h"
   }];
-  return <div className="space-y-8">
+  
+  return (
+    <div className="space-y-8">
+      {showProfileHint && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded flex items-center mb-6">
+          <span>
+            <strong>Get personalized style picks!</strong> Fill in your measurements
+            in your <button className="underline text-brand-700" onClick={() => navigate("/profile")}>profile</button> for smarter recommendations from Styli.
+          </span>
+        </div>
+      )}
+
       <Tabs defaultValue="feed" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="feed">For You</TabsTrigger>
@@ -127,35 +184,49 @@ const PersonalizedFeed = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4">Recommended for you</h3>
             <div className="grid md:grid-cols-3 gap-6">
-              {recommendedInfluencers.map(influencer => <Card key={influencer.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+              {recommendedInfluencers.map((influencer) => (
+                <Card key={influencer.id} className="cursor-pointer hover:shadow-lg transition-shadow">
                   <CardContent className="p-6 text-center">
                     <img src={influencer.image} alt={influencer.name} className="w-20 h-20 rounded-full mx-auto mb-4 object-cover" />
                     <h4 className="font-semibold mb-1">{influencer.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">{influencer.category} • {influencer.followers} followers</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {influencer.category} • {influencer.followers} followers
+                    </p>
                     <p className="text-xs text-brand-600 mb-4">{influencer.reason}</p>
                     <Button size="sm" variant="outline" onClick={() => navigate(`/influencer/${influencer.id}`)}>
                       View Profile
                     </Button>
                   </CardContent>
-                </Card>)}
+                </Card>
+              ))}
             </div>
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold mb-4">Products you might like</h3>
+            <h3 className="text-xl font-semibold mb-4">Products tailored for {user?.name || "you"}</h3>
             <div className="grid md:grid-cols-3 gap-6">
-              {recommendedProducts.map(product => <Card key={product.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-4" />
-                    <h4 className="font-semibold mb-2">{product.name}</h4>
-                    <p className="text-brand-600 font-bold mb-2">{product.price}</p>
-                    <p className="text-sm text-gray-600 mb-4">Recommended by {product.influencer}</p>
-                    <Button size="sm" className="w-full">
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      View Product
-                    </Button>
-                  </CardContent>
-                </Card>)}
+              {recommendedProducts.length === 0 ? (
+                <div className="text-center text-gray-500 col-span-3">
+                  No personalized items found for your profile! Try updating your measurements.
+                </div>
+              ) : (
+                recommendedProducts.map((product) => (
+                  <Card key={product.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+                      <h4 className="font-semibold mb-2">{product.name}</h4>
+                      <p className="text-brand-600 font-bold mb-2">{product.price}</p>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Recommended by {product.influencer}
+                      </p>
+                      <Button size="sm" className="w-full">
+                        <ShoppingBag className="h-4 w-4 mr-2" />
+                        View Product
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </TabsContent>
@@ -214,6 +285,8 @@ const PersonalizedFeed = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default PersonalizedFeed;
