@@ -1,10 +1,7 @@
-
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
-const Terms = () => (
-  <div className="bg-white min-h-screen flex flex-col">
+const Terms = () => <div className="bg-white min-h-screen flex flex-col">
     <Navbar />
     <main className="flex-1 container max-w-3xl py-12 px-4">
       <h1 className="text-3xl font-bold mb-6 text-brand-700">Influstyle – Terms and Conditions</h1>
@@ -82,11 +79,9 @@ const Terms = () => (
       <h2 className="text-xl font-semibold mt-8 mb-2">10. Contact Us</h2>
       <p className="mb-4">
         If you have questions about these Terms, contact us at:<br />
-        <span className="font-mono">📧 legal@influstyle.com</span>
+        <span className="font-mono">📧 styleinflu@gmail.com</span>
       </p>
     </main>
     <Footer />
-  </div>
-);
-
+  </div>;
 export default Terms;
