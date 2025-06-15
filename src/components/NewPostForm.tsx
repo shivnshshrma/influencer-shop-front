@@ -17,6 +17,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Image, Video, Link as LinkIcon } from "lucide-react";
 import { savePost } from "@/utils/localStorage";
+import ImportImageGallery from "@/components/ImportImageGallery";
 
 const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -83,11 +84,6 @@ const NewPostForm = () => {
     }
   };
 
-  const handleImageUrlChange = (value: string) => {
-    form.setValue("image", value);
-    setPreviewUrl(value);
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -144,26 +140,17 @@ const NewPostForm = () => {
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
+                  <FormLabel>Image</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="https://example.com/image.jpg" 
-                      {...field}
-                      onChange={(e) => handleImageUrlChange(e.target.value)}
+                    <ImportImageGallery
+                      value={field.value}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        setPreviewUrl(val);
+                      }}
+                      sampleImages={sampleImages}
                     />
                   </FormControl>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {sampleImages.map((url, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className="border rounded-md p-1 hover:border-brand-600 transition-colors"
-                        onClick={() => handleImageUrlChange(url)}
-                      >
-                        <img src={url} alt={`Sample ${index + 1}`} className="h-10 w-10 object-cover" />
-                      </button>
-                    ))}
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
