@@ -16,6 +16,7 @@ import AllInfluencers from "./pages/AllInfluencers";
 import Categories from "./pages/Categories";
 import Shop from "./pages/Shop";
 import PostDetails from "./pages/PostDetails";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/influencers" element={<AllInfluencers />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/post/:id" element={<PostDetails />} />
+            <Route path="/terms" element={<Terms />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

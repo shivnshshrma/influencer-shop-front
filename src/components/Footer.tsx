@@ -1,4 +1,3 @@
-
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import {
   Accordion,
@@ -213,4 +212,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
