@@ -1,6 +1,6 @@
 
 import React, { useRef } from "react";
-import { Image } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ImportImageGalleryProps {
@@ -25,7 +25,7 @@ const ImportImageGallery: React.FC<ImportImageGalleryProps> = ({
     onChange(url);
   };
 
-  const handleImportClick = () => {
+  const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -47,11 +47,11 @@ const ImportImageGallery: React.FC<ImportImageGalleryProps> = ({
         <Button
           variant="outline"
           type="button"
-          onClick={handleImportClick}
+          onClick={handleUploadClick}
           className="flex gap-2 items-center"
         >
-          <Image size={20} />
-          Import Image
+          <Upload size={20} />
+          Upload Image
         </Button>
         <input
           type="file"
@@ -62,7 +62,7 @@ const ImportImageGallery: React.FC<ImportImageGalleryProps> = ({
           onChange={handleFileChange}
         />
         <span className="text-sm text-muted-foreground">
-          (Choose one image or pick a sample below)
+          (Choose one image to upload or pick a sample below)
         </span>
       </div>
       {sampleImages.length > 0 && (
@@ -83,7 +83,7 @@ const ImportImageGallery: React.FC<ImportImageGalleryProps> = ({
         <div className="mt-2 relative w-32 h-32">
           <img
             src={value}
-            alt="Selected"
+            alt="Uploaded"
             className="object-cover w-full h-full border rounded"
           />
           <button
@@ -101,3 +101,4 @@ const ImportImageGallery: React.FC<ImportImageGalleryProps> = ({
 };
 
 export default ImportImageGallery;
+
