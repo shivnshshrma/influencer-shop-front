@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Bot, User, Sparkles, Hanger } from "lucide-react";
+import { MessageCircle, Send, Bot, User, Sparkles } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -93,13 +92,13 @@ const AIChatRoom = () => {
     }
   };
 
-  // Typing animation component (with sparkle/hanger & animated dots)
+  // Typing animation component (with sparkle & animated dots)
   const AITypingBubble = () => (
     <div className="flex gap-3 justify-start items-end mb-2 animate-fade-in">
       <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
         {/* Avatar: minimal neutral with hat (simulate with icons) */}
         <MessageCircle className="h-5 w-5 text-brand-600" />
-        {/* Could swap MessageCircle for sparkle/hanger, but using first for avatar */}
+        {/* Could swap MessageCircle for sparkle, but using first for avatar */}
       </div>
       <div className="max-w-[280px] px-4 py-2 rounded-lg bg-brand-100 flex items-center gap-2">
         <span className="flex gap-1 items-center">
