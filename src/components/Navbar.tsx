@@ -68,17 +68,24 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center space-x-6">
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap">How It Works</a>
-            
             {isLoggedIn ? (
               <ProfileButton />
             ) : (
               <div className="flex space-x-3">
-                <Button variant="outline" onClick={() => navigate("/auth?tab=login")}>Log In</Button>
-                <Button onClick={() => navigate("/auth?tab=signup")}>Sign Up</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/auth?tab=login")}
+                >
+                  Log In
+                </Button>
+                <Button
+                  onClick={() => navigate("/auth?tab=signup")}
+                >
+                  Sign Up
+                </Button>
               </div>
             )}
           </div>
-          
           <div className="md:hidden flex items-center space-x-3">
             <button
               onClick={() => setIsSearchOpen(true)}
@@ -101,7 +108,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-      
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden">
@@ -136,8 +142,25 @@ const Navbar = () => {
                 </Button>
               ) : (
                 <>
-                  <Button className="w-full" variant="outline" onClick={() => { setIsMenuOpen(false); navigate("/auth?tab=login"); }}>Log In</Button>
-                  <Button className="w-full" onClick={() => { setIsMenuOpen(false); navigate("/auth?tab=signup"); }}>Sign Up</Button>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/auth?tab=login");
+                    }}
+                  >
+                    Log In
+                  </Button>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate("/auth?tab=signup");
+                    }}
+                  >
+                    Sign Up
+                  </Button>
                 </>
               )}
             </div>
@@ -207,3 +230,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
