@@ -44,6 +44,8 @@ const measurementsSchema = z.object({
   skinTone: z.string().optional(),
 });
 
+type Gender = "male" | "female";
+
 type ProfileFormValues = z.infer<typeof profileSchema>;
 type MeasurementsFormValues = z.infer<typeof measurementsSchema>;
 
@@ -51,14 +53,36 @@ const Profile = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Added gender to user state and default values
-  const [user, setUser] = useState({
+
+  // Define user type to enforce gender is always "male" or "female"
+  type UserType = {
+    name: string;
+    email: string;
+    phone: string;
+    avatar: string;
+    gender: Gender;
+    measurements: {
+      height: string;
+      chest: string;
+      waist: string;
+      hips: string;
+      shoeSize: string;
+      skinTone: string;
+    }
+  };
+
+  // Helper to sanitize gender from localStorage
+  const sanitizeGender = (raw: any): Gender => {
+    return raw === "male" || raw === "female" ? raw : "male";
+  };
+
+  // Initialize with default values to prevent undefined issues
+  const [user, setUser] = useState<UserType>({
     name: "User",
     email: "user@example.com",
     phone: "9876543210",
     avatar: "",
-    gender: "male", // default
+    gender: "male",
     measurements: {
       height: "170",
       chest: "90",
@@ -75,15 +99,14 @@ const Profile = () => {
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
-        // Ensure measurements object exists with default values if missing
         const measurements = parsedUser.measurements || {};
-        
+        const gender: Gender = sanitizeGender(parsedUser.gender);
         setUser({
           name: parsedUser.name || "User",
           email: parsedUser.email || "user@example.com",
           phone: parsedUser.phone || "9876543210",
           avatar: parsedUser.avatar || "",
-          gender: parsedUser.gender || "male", // load or default
+          gender, // enforce the type!
           measurements: {
             height: measurements.height || "170",
             chest: measurements.chest || "90",
@@ -106,7 +129,7 @@ const Profile = () => {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      gender: user.gender || "male",
+      gender: user.gender, // now safely typed
     }
   });
 
@@ -115,7 +138,7 @@ const Profile = () => {
     profileForm.setValue("name", user.name);
     profileForm.setValue("email", user.email);
     profileForm.setValue("phone", user.phone || "");
-    profileForm.setValue("gender", user.gender || "male");
+    profileForm.setValue("gender", user.gender); // gender is always "male" or "female"
   }, [user, profileForm]);
 
   const measurementsForm = useForm<MeasurementsFormValues>({
