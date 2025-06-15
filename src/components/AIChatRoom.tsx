@@ -64,7 +64,11 @@ const AIChatRoom = ({ isOpen, setIsOpen }: AIChatRoomProps) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent className="w-[400px] sm:w-[420px] max-h-[90vh] flex flex-col p-0">
+      <SheetContent
+        className="w-full sm:w-[420px] max-w-full h-screen max-h-screen rounded-none flex flex-col p-0"
+        // Make the sidebar full height, width on mobile, side panel on desktop
+        side="right"
+      >
         <SheetHeader className="px-6 pt-6 pb-2">
           <SheetTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-brand-600" />
@@ -74,25 +78,23 @@ const AIChatRoom = ({ isOpen, setIsOpen }: AIChatRoomProps) => {
             Your personal style BFF, powered by AI.
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col flex-1 h-[450px] sm:h-[60vh] px-6 pb-4">
-          <ScrollArea className="flex-1 pr-2">
+        {/* Make chat area flex-1 to take all space */}
+        <div className="flex flex-col flex-1 h-0 min-h-0 px-6 pb-4">
+          <ScrollArea className="flex-1 min-h-0 pr-2">
             <div className="space-y-4">
               {messages.map(message => (
                 <div key={message.id} className={`flex gap-3 ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  {/* AI AVATAR */}
                   {message.sender === "ai" && (
                     <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
                       <MessageCircle className="h-5 w-5 text-brand-600" />
                     </div>
                   )}
-                  {/* AI message and User message styling */}
                   <div className={`max-w-[280px] p-3 rounded-lg ${message.sender === "user" ? "bg-brand-600 text-white" : "bg-brand-200 text-brand-700"}`}>
                     <p className="text-sm">{message.text}</p>
                     <span className="text-xs opacity-70 mt-1 block">
                       {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  {/* User AVATAR */}
                   {message.sender === "user" && (
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
                       <User className="h-4 w-4 text-gray-600" />
@@ -100,7 +102,6 @@ const AIChatRoom = ({ isOpen, setIsOpen }: AIChatRoomProps) => {
                   )}
                 </div>
               ))}
-              {/* If AI is typing, show the animated typing bubble */}
               {isAITyping && <AITypingBubble />}
             </div>
           </ScrollArea>
@@ -138,3 +139,4 @@ const AIChatRoom = ({ isOpen, setIsOpen }: AIChatRoomProps) => {
 };
 
 export default AIChatRoom;
+
