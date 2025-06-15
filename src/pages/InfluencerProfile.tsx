@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import NewPostForm from "../components/NewPostForm";
 import InfluencerPosts from "../components/InfluencerPosts";
+import ImportImageGallery from "../components/ImportImageGallery";
 
 const InfluencerProfile = () => {
   const navigate = useNavigate();
@@ -95,6 +95,9 @@ const InfluencerProfile = () => {
           </TabsList>
           
           <TabsContent value="posts" className="space-y-6">
+            {/* --- Add import images UI/option here --- */}
+            <ImportImageGallery />
+            {/* --- Existing Create New Post/Posts UI below --- */}
             <Card>
               <CardHeader>
                 <CardTitle>Create New Post</CardTitle>
