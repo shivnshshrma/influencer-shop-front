@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, Bot, User, Sparkles } from "lucide-react";
+import AITypingBubble from "./AITypingBubble";
+import { generateAIResponse } from "./aiChatUtils";
 import {
   Sheet,
   SheetContent,
@@ -60,58 +62,11 @@ const AIChatRoom = () => {
     }, 1200);
   };
 
-  const generateAIResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes("headphone") || input.includes("audio")) {
-      return "I'd recommend our Wireless Noise-Cancelling Headphones for ₹20,699. They offer excellent sound quality and comfort. Would you like to know more about their features?";
-    }
-    
-    if (input.includes("yoga") || input.includes("fitness")) {
-      return "For fitness enthusiasts, we have a Premium Yoga Mat for ₹7,399. It's eco-friendly and provides excellent grip. We also have other fitness products. What specific fitness equipment are you looking for?";
-    }
-    
-    if (input.includes("beauty") || input.includes("skincare")) {
-      return "Our Hydrating Facial Serum for ₹4,819 is very popular! It's recommended by beauty influencer Sarah Chen. Would you like recommendations for other skincare products?";
-    }
-    
-    if (input.includes("price") || input.includes("budget")) {
-      return "I can help you find products within your budget! What's your price range? We have products from ₹2,909 to ₹20,699 across various categories.";
-    }
-    
-    if (input.includes("smart home") || input.includes("home")) {
-      return "Check out our Smart Home Assistant for ₹10,719! It can control your lights, music, and answer questions. Perfect for making your home smarter.";
-    }
-    
-    return "That's a great question! I can help you find the perfect product. Could you tell me more about what you're looking for? I can search through our tech, fashion, beauty, fitness, home, and lifestyle categories.";
-  };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSendMessage();
     }
   };
-
-  // Typing animation component (with sparkle & animated dots)
-  const AITypingBubble = () => (
-    <div className="flex gap-3 justify-start items-end mb-2 animate-fade-in">
-      <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
-        {/* Avatar: minimal neutral with hat (simulate with icons) */}
-        <MessageCircle className="h-5 w-5 text-brand-600" />
-        {/* Could swap MessageCircle for sparkle, but using first for avatar */}
-      </div>
-      <div className="max-w-[280px] px-4 py-2 rounded-lg bg-brand-100 flex items-center gap-2">
-        <span className="flex gap-1 items-center">
-          <Sparkles className="h-4 w-4 text-brand-600 animate-pulse" />
-          <span className="text-white font-medium">
-            <span className="inline-block animate-bounce" style={{ animationDelay: '0s' }}>.</span>
-            <span className="inline-block animate-bounce" style={{ animationDelay: '.1s' }}>.</span>
-            <span className="inline-block animate-bounce" style={{ animationDelay: '.2s' }}>.</span>
-          </span>
-        </span>
-      </div>
-    </div>
-  );
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
