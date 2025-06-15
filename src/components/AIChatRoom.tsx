@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,14 +98,14 @@ const AIChatRoom = () => {
           className="flex items-center gap-2"
         >
           <MessageCircle className="h-4 w-4" />
-          styli
+          <span className="text-brand-600 font-bold">styli</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-brand-600" />
-            styli
+            <span className="text-brand-600 font-bold">styli</span>
           </SheetTitle>
           <SheetDescription>
             Get personalized product recommendations and shopping assistance
