@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ interface Post {
   userId: string;
   caption: string;
   media: string[];
+  link?: string;
   createdAt: Date;
 }
 
@@ -23,6 +25,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({}) => {
   const [formData, setFormData] = useState({
     caption: "",
     media: [] as string[],
+    link: "",
   });
   const [error, setError] = useState<string | undefined>(undefined);
   const { toast } = useToast();
@@ -41,19 +44,23 @@ const NewPostForm: React.FC<NewPostFormProps> = ({}) => {
     });
   };
 
-  // Fix typing for post creation to allow 'media' property (since Omit<Post, ...> disallows 'media')
-  // You should define the `media` field in your actual type or else just use 'any' for the submit field including media.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.caption && (!formData.media || formData.media.length === 0)) {
-      setError("Please add a caption or at least one photo or video.");
+
+    // Require at least one: caption, media, or link
+    if (
+      !formData.caption &&
+      (!formData.media || formData.media.length === 0) &&
+      !formData.link
+    ) {
+      setError("Please add a caption, a link, or at least one photo or video.");
       return;
     }
 
     setError(undefined);
 
     const newPost = {
-      ...formData, // this contains .media and .caption
+      ...formData, // contains .media, .caption, .link
       // add any other required properties here
     };
 
@@ -70,6 +77,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({}) => {
     setFormData({
       caption: "",
       media: [],
+      link: "",
     });
   };
 
@@ -88,13 +96,24 @@ const NewPostForm: React.FC<NewPostFormProps> = ({}) => {
               className="resize-none"
             />
           </div>
-
+          <div>
+            <Label htmlFor="link">Link</Label>
+            <Input
+              id="link"
+              name="link"
+              placeholder="Paste your product or promo link (optional)"
+              type="url"
+              value={formData.link}
+              onChange={handleChange}
+              autoComplete="off"
+            />
+          </div>
           <div>
             <Label>Media</Label>
             <MediaUploadGallery
               value={formData.media}
               onChange={handleMediaChange}
-              maxFiles={5}
+              maxFiles={10}
             />
           </div>
 
@@ -108,3 +127,4 @@ const NewPostForm: React.FC<NewPostFormProps> = ({}) => {
 };
 
 export default NewPostForm;
+
