@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,22 +63,25 @@ const Navbar = () => {
             </a>
           </div>
           
-          <div className="hidden md:flex items-center space-x-6">
-            <div className="flex items-center space-x-3">
-              <div className="relative w-64">
+          <div className="hidden md:flex items-center space-x-6 flex-1 max-w-2xl mx-8">
+            <div className="flex items-center space-x-3 flex-1">
+              <div className="relative flex-1 max-w-xl">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Search className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <Input 
                   placeholder="Search products, influencers..."
-                  className="pl-10 bg-muted text-foreground"
+                  className="pl-10 bg-muted text-foreground w-full"
                   onClick={() => setIsSearchOpen(true)}
                   readOnly
                 />
               </div>
               <AIChatRoom />
             </div>
-            <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors">How It Works</a>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-6">
+            <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap">How It Works</a>
             
             {isLoggedIn ? (
               <ProfileButton />
