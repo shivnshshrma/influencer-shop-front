@@ -95,8 +95,7 @@ const InfluencerProfile = () => {
           </TabsList>
           
           <TabsContent value="posts" className="space-y-6">
-            {/* --- Add import images UI/option here --- */}
-            <ImportImageGallery />
+            {/* --- Removed ImportImageGallery here as it's already included in Create New Post --- */}
             {/* --- Existing Create New Post/Posts UI below --- */}
             <Card>
               <CardHeader>
