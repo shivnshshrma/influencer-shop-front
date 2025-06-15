@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -17,16 +16,51 @@ const influencerDatabase = [
         id: 1,
         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
         caption: "Premium wireless headphones for your style.",
+        shopItems: [
+          {
+            id: "shirt",
+            title: "Navy Polo Shirt",
+            image: "https://images.unsplash.com/photo-1469398715555-76331e9cc3da?auto=format&fit=crop&w=500&q=80",
+            link: "#"
+          },
+          {
+            id: "jeans",
+            title: "Classic Blue Jeans",
+            image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=500&q=80",
+            link: "#"
+          },
+          {
+            id: "watch",
+            title: "Silver Watch",
+            image: "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=500&q=80",
+            link: "#"
+          },
+          {
+            id: "shoes",
+            title: "White Sneakers",
+            image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=500&q=80",
+            link: "#"
+          },
+        ]
       },
       {
         id: 6,
         image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80",
         caption: "Designer sunglasses—ultimate fashion statement!",
+        shopItems: [
+          {
+            id: "sunglasses",
+            title: "Designer Sunglasses",
+            image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=500&q=80",
+            link: "#"
+          }
+        ]
       },
       {
         id: 7,
         image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80",
         caption: "Summer Collection Review: My faves of the season.",
+        shopItems: []
       },
     ],
   },
@@ -104,6 +138,7 @@ const findPostById = (id: string | undefined) => {
           avatar: inf.avatar,
         },
         category: inf.category,
+        shopItems: product.shopItems || [],
       };
     }
   }
@@ -156,12 +191,45 @@ const PostDetails = () => {
           </div>
           <h2 className="text-2xl font-bold mb-2">Post</h2>
           <p className="mb-4">{post.caption}</p>
-          {/* Placeholder for 'Shop this post' products */}
+          {/* Shop this post area */}
           <div className="mt-6">
-            <div className="font-medium text-lg mb-2">Shop this post (coming soon)</div>
-            <div className="rounded border border-dashed p-6 text-muted-foreground text-center">
-              Product recommendations will appear here!
+            <div className="flex justify-between items-center mb-2">
+              <div className="font-medium text-lg">Shop this post</div>
+              <span className="text-xs text-muted-foreground">Paid links</span>
             </div>
+            {post.shopItems && post.shopItems.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {post.shopItems.map(item => (
+                  <a
+                    key={item.id}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col bg-white border rounded-lg overflow-hidden shadow group hover:shadow-lg transition gap-1"
+                    title={item.title}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full aspect-square object-cover"
+                    />
+                    <div className="flex-1 flex flex-col justify-between py-2 px-2">
+                      <span className="text-sm font-medium text-center">{item.title}</span>
+                      <button
+                        tabIndex={-1}
+                        className="self-center text-gray-400 hover:text-brand-600 transition text-xl mt-1"
+                        aria-label="Add to wishlist"
+                        style={{pointerEvents: 'none'}}
+                      >♡</button>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded border border-dashed p-6 text-muted-foreground text-center">
+                Product recommendations will appear here!
+              </div>
+            )}
           </div>
         </div>
       </main>

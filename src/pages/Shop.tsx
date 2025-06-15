@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import ShopPostCard from "../components/ShopPostCard";
 import { useNavigate } from "react-router-dom";
 
-// Mock data for influencer posts (merge from influencers' data)
+// Mock data for influencer posts (kept the same as before; see PostDetails shopItems for item details)
 const influencerDatabase = [
   {
     id: 1,
