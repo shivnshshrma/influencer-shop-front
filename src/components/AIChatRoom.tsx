@@ -101,19 +101,18 @@ const AIChatRoom = () => {
                     message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {/* AI AVATAR (styled as described) */}
+                  {/* AI AVATAR */}
                   {message.sender === "ai" && (
                     <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      {/* Minimal silhouette/neutral (MessageCircle as neutral face), and could swap to user avatars later */}
                       <MessageCircle className="h-5 w-5 text-brand-600" />
                     </div>
                   )}
-                  {/* AI message styling: pink with white text */}
+                  {/* AI message styling – more visible */}
                   <div
                     className={`max-w-[280px] p-3 rounded-lg ${
                       message.sender === "user"
                         ? "bg-brand-600 text-white"
-                        : "bg-brand-100 text-white"
+                        : "bg-brand-200 text-brand-700"
                     }`}
                   >
                     <p className="text-sm">{message.text}</p>
