@@ -61,7 +61,7 @@ const Auth = () => {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="login">
                   <div className="space-y-4">
-                    <CardTitle>Welcome </CardTitle>
+                    <CardTitle>                        Welcome</CardTitle>
                     <CardDescription>
                       Enter your credentials to access your account
                     </CardDescription>
