@@ -69,6 +69,33 @@ type ProfileFormValues = z.infer<typeof profileSchema> & {
 };
 type MeasurementsFormValues = z.infer<typeof measurementsSchema>;
 
+// ==================== OPTIONS ARRAYS (For Select Inputs) ===========================
+const bodyTypeOptions = [
+  { value: "", label: "Select Body Type" },
+  { value: "pear", label: "Pear (wider hips, narrow shoulders)" },
+  { value: "hourglass", label: "Hourglass (bust ≈ hips, narrow waist)" },
+  { value: "rectangle", label: "Rectangle (bust ≈ waist ≈ hips)" },
+  { value: "invertedTriangle", label: "Inverted Triangle (broad shoulders, slimmer hips)" },
+  { value: "trapezoid", label: "Trapezoid (men, broad shoulders, slim waist)" },
+  { value: "triangle", label: "Triangle (men, narrower shoulders, wider waist/hips)" }
+];
+
+const stylePreferenceOptions = [
+  { value: "", label: "Select Style Preference" },
+  { value: "casual", label: "Casual (comfortable, relaxed)" },
+  { value: "formal", label: "Formal (tailored, elegant)" },
+  { value: "athletic", label: "Athletic (sporty, functional)" },
+  { value: "streetwear", label: "Streetwear (urban, trend-driven)" }
+];
+
+const colorSeasonOptions = [
+  { value: "", label: "Select Color Season" },
+  { value: "spring", label: "Spring (warm, clear, light)" },
+  { value: "summer", label: "Summer (cool, soft, light)" },
+  { value: "autumn", label: "Autumn (warm, deep, earthy)" },
+  { value: "winter", label: "Winter (cool, intense, deep)" }
+];
+
 const Profile = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
@@ -266,6 +293,22 @@ const Profile = () => {
     localStorage.setItem("userData", JSON.stringify(updatedUser));
     setIsEditMode(false);
     toast.success("Profile updated successfully!");
+  };
+
+  // ------------- MEASUREMENTS FORM SUBMIT HANDLER (MISSING BEFORE) ---------------
+  const handleMeasurementsSubmit = (data: MeasurementsFormValues) => {
+    // Merge the new measurements into user state
+    const updatedUser = {
+      ...user,
+      measurements: {
+        ...user.measurements,
+        ...data,
+      },
+    };
+    setUser(updatedUser);
+    localStorage.setItem("userData", JSON.stringify(updatedUser));
+    // Use toast from the correct location if needed!
+    toast.success("Measurements updated successfully!");
   };
 
   return (
