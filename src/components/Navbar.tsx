@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,7 +71,7 @@ const Navbar = () => {
                   readOnly
                 />
               </div>
-              <AIChatRoom />
+              <AIChatRoom isOpen={isAIChatOpen} setIsOpen={setIsAIChatOpen} />
             </div>
           </div>
 
@@ -146,7 +148,7 @@ const Navbar = () => {
                   readOnly
                 />
               </div>
-              <AIChatRoom />
+              <AIChatRoom isOpen={isAIChatOpen} setIsOpen={setIsAIChatOpen} />
             </div>
             <Button
               variant="ghost"
@@ -267,3 +269,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
