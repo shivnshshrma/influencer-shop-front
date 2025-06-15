@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,35 +20,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import LoginForm from "./LoginForm";
-import SignupForm from "./SignupForm";
 import ProfileButton from "./ProfileButton";
 import AIChatRoom from "./AIChatRoom";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   // Check if user is logged in
   useEffect(() => {
     const loggedInStatus = localStorage.getItem("isLoggedIn");
     setIsLoggedIn(loggedInStatus === "true");
   }, []);
-
-  const handleLoginSuccess = () => {
-    setIsLoginOpen(false);
-    localStorage.setItem("isLoggedIn", "true");
-    setIsLoggedIn(true);
-  };
-
-  const handleSignupSuccess = () => {
-    setIsSignupOpen(false);
-    localStorage.setItem("isLoggedIn", "true");
-    setIsLoggedIn(true);
-  };
 
   return (
     <nav className="bg-background border-b border-border shadow-sm sticky top-0 z-50 transition-colors">
@@ -86,39 +73,8 @@ const Navbar = () => {
               <ProfileButton />
             ) : (
               <div className="flex space-x-3">
-                <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline">Log In</Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Log In to Your Account</SheetTitle>
-                      <SheetDescription>
-                        Enter your credentials to access your account
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="mt-6">
-                      <LoginForm onSuccess={handleLoginSuccess} />
-                    </div>
-                  </SheetContent>
-                </Sheet>
-                
-                <Sheet open={isSignupOpen} onOpenChange={setIsSignupOpen}>
-                  <SheetTrigger asChild>
-                    <Button>Sign Up</Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Create Your Account</SheetTitle>
-                      <SheetDescription>
-                        Fill out the form below to get started
-                      </SheetDescription>
-                    </SheetHeader>
-                    <div className="mt-6">
-                      <SignupForm onSuccess={handleSignupSuccess} />
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                <Button variant="outline" onClick={() => navigate("/auth?tab=login")}>Log In</Button>
+                <Button onClick={() => navigate("/auth?tab=signup")}>Sign Up</Button>
               </div>
             )}
           </div>
@@ -180,39 +136,8 @@ const Navbar = () => {
                 </Button>
               ) : (
                 <>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button className="w-full" variant="outline">Log In</Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle>Log In to Your Account</SheetTitle>
-                        <SheetDescription>
-                          Enter your credentials to access your account
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-6">
-                        <LoginForm onSuccess={() => setIsMenuOpen(false)} />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                  
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button className="w-full">Sign Up</Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle>Create Your Account</SheetTitle>
-                        <SheetDescription>
-                          Fill out the form below to get started
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-6">
-                        <SignupForm onSuccess={() => setIsMenuOpen(false)} />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+                  <Button className="w-full" variant="outline" onClick={() => { setIsMenuOpen(false); navigate("/auth?tab=login"); }}>Log In</Button>
+                  <Button className="w-full" onClick={() => { setIsMenuOpen(false); navigate("/auth?tab=signup"); }}>Sign Up</Button>
                 </>
               )}
             </div>
@@ -229,7 +154,7 @@ const Navbar = () => {
             <CommandGroup heading="Products">
               <CommandItem className="flex items-center gap-2 py-3 text-foreground hover:bg-accent">
                 <img 
-                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" 
+                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" 
                   alt="Headphones" 
                   className="w-10 h-10 object-cover rounded"
                 />
@@ -240,7 +165,7 @@ const Navbar = () => {
               </CommandItem>
               <CommandItem className="flex items-center gap-2 py-3 text-foreground hover:bg-accent">
                 <img 
-                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
                   alt="Yoga Mat" 
                   className="w-10 h-10 object-cover rounded"
                 />
