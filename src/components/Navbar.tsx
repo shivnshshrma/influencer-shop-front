@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -236,7 +235,7 @@ const Navbar = () => {
                 />
                 <div>
                   <p className="font-medium text-foreground">Wireless Noise-Cancelling Headphones</p>
-                  <p className="text-sm text-muted-foreground">$249</p>
+                  <p className="text-sm text-muted-foreground">₹20,699</p>
                 </div>
               </CommandItem>
               <CommandItem className="flex items-center gap-2 py-3 text-foreground hover:bg-accent">
@@ -247,7 +246,7 @@ const Navbar = () => {
                 />
                 <div>
                   <p className="font-medium text-foreground">Premium Yoga Mat</p>
-                  <p className="text-sm text-muted-foreground">$89</p>
+                  <p className="text-sm text-muted-foreground">₹7,399</p>
                 </div>
               </CommandItem>
             </CommandGroup>
