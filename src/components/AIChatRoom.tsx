@@ -65,7 +65,7 @@ const AIChatRoom = () => {
             <Bot className="h-5 w-5 text-brand-600" />
             <span className="text-brand-600 font-bold">styli</span>
           </SheetTitle>
-          <SheetDescription>"Your personal style BFF, powered by AI."</SheetDescription>
+          <SheetDescription className="text-inherit">Your personal style BFF, powered by AI.</SheetDescription>
         </SheetHeader>
         
         <div className="flex flex-col h-[calc(100vh-120px)] mt-6">
