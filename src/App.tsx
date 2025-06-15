@@ -14,6 +14,8 @@ import Auth from "./pages/Auth";
 import ForYou from "./pages/ForYou";
 import AllInfluencers from "./pages/AllInfluencers";
 import Categories from "./pages/Categories";
+import Shop from "./pages/Shop";
+import PostDetails from "./pages/PostDetails";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/influencer/:id" element={<InfluencerTimeline />} />
             <Route path="/influencer-profile" element={<InfluencerProfile />} />
             <Route path="/influencers" element={<AllInfluencers />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/post/:id" element={<PostDetails />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

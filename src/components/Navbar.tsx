@@ -83,6 +83,12 @@ const Navbar = () => {
               Start Shopping
             </Button>
             <a
+              href="/shop"
+              className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap"
+            >
+              Shop
+            </a>
+            <a
               href="/categories"
               className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap"
             >
