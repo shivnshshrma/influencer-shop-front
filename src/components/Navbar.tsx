@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, ShoppingCart } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -30,11 +30,19 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is logged in
   useEffect(() => {
     const loggedInStatus = localStorage.getItem("isLoggedIn");
     setIsLoggedIn(loggedInStatus === "true");
   }, []);
+
+  // Add start shopping handler
+  const handleStartShopping = () => {
+    if (isLoggedIn) {
+      navigate("/for-you");
+    } else {
+      navigate("/auth?intent=shopping");
+    }
+  };
 
   return (
     <nav className="bg-background border-b border-border shadow-sm sticky top-0 z-50 transition-colors">
@@ -67,6 +75,14 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2"
+              onClick={handleStartShopping}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              Start Shopping
+            </Button>
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap">How It Works</a>
             {isLoggedIn ? (
               <ProfileButton />
@@ -93,6 +109,7 @@ const Navbar = () => {
             >
               <Search className="h-5 w-5" />
             </button>
+            {/* Mobile hamburger */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:text-foreground hover:bg-accent focus:outline-none"
@@ -126,6 +143,17 @@ const Navbar = () => {
               </div>
               <AIChatRoom />
             </div>
+            <Button
+              variant="ghost"
+              className="w-full flex items-center gap-2"
+              onClick={() => {
+                setIsMenuOpen(false);
+                handleStartShopping();
+              }}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              Start Shopping
+            </Button>
             <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent">
               How It Works
             </a>
@@ -230,4 +258,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

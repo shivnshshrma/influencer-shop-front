@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import NewPostForm from "../components/NewPostForm";
 import InfluencerPosts from "../components/InfluencerPosts";
-import ImportImageGallery from "../components/ImportImageGallery";
 
 const InfluencerProfile = () => {
   const navigate = useNavigate();
