@@ -16,14 +16,14 @@ const Auth = () => {
     if (intent === 'influencer') {
       navigate("/influencer-profile");
     } else {
-      navigate("/");
+      navigate("/for-you");
     }
   };
   const handleSignupSuccess = () => {
     if (intent === 'influencer') {
       navigate("/influencer-profile");
     } else {
-      navigate("/");
+      navigate("/for-you");
     }
   };
   const getTitle = () => {

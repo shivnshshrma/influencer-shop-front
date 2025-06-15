@@ -24,8 +24,8 @@ const HowItWorks = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     
     if (isLoggedIn) {
-      // User is logged in, can start shopping (stay on current page or navigate to products)
-      console.log("User can start shopping");
+      // Redirect to personalized For You page
+      navigate("/for-you");
     } else {
       // Redirect to auth page with shopping intent
       navigate("/auth?intent=shopping");
