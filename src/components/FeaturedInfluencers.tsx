@@ -40,6 +40,10 @@ const FeaturedInfluencers = () => {
     navigate(`/influencer/${influencerId}`);
   };
 
+  const handleInfluencerClick = (influencerId: number) => {
+    navigate(`/influencer/${influencerId}`);
+  };
+
   return (
     <section className="section bg-gray-50">
       <div className="container">
@@ -54,7 +58,10 @@ const FeaturedInfluencers = () => {
           {influencers.map((influencer) => (
             <div key={influencer.id} className="influencer-card group">
               <div className="relative">
-                <Avatar className="h-32 w-32 border-4 border-white shadow-md mx-auto mb-4 transition-transform group-hover:scale-105">
+                <Avatar 
+                  className="h-32 w-32 border-4 border-white shadow-md mx-auto mb-4 transition-transform group-hover:scale-105 cursor-pointer"
+                  onClick={() => handleInfluencerClick(influencer.id)}
+                >
                   <img 
                     src={influencer.image} 
                     alt={influencer.name} 
