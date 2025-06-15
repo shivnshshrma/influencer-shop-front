@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Bot, User } from "lucide-react";
+import { MessageCircle, Send, Bot, User, Sparkles, Hanger } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -30,6 +30,7 @@ const AIChatRoom = () => {
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isAITyping, setIsAITyping] = useState(false);
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
@@ -41,8 +42,9 @@ const AIChatRoom = () => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
+    setIsAITyping(true);
 
     // Simulate AI response
     setTimeout(() => {
@@ -53,8 +55,9 @@ const AIChatRoom = () => {
         sender: "ai",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
+      setMessages((prev) => [...prev, aiMessage]);
+      setIsAITyping(false);
+    }, 1200);
   };
 
   const generateAIResponse = (userInput: string): string => {
@@ -89,6 +92,27 @@ const AIChatRoom = () => {
     }
   };
 
+  // Typing animation component (with sparkle/hanger & animated dots)
+  const AITypingBubble = () => (
+    <div className="flex gap-3 justify-start items-end mb-2 animate-fade-in">
+      <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
+        {/* Avatar: minimal neutral with hat (simulate with icons) */}
+        <MessageCircle className="h-5 w-5 text-brand-600" />
+        {/* Could swap MessageCircle for sparkle/hanger, but using first for avatar */}
+      </div>
+      <div className="max-w-[280px] px-4 py-2 rounded-lg bg-brand-100 flex items-center gap-2">
+        <span className="flex gap-1 items-center">
+          <Sparkles className="h-4 w-4 text-brand-600 animate-pulse" />
+          <span className="text-white font-medium">
+            <span className="inline-block animate-bounce" style={{ animationDelay: '0s' }}>.</span>
+            <span className="inline-block animate-bounce" style={{ animationDelay: '.1s' }}>.</span>
+            <span className="inline-block animate-bounce" style={{ animationDelay: '.2s' }}>.</span>
+          </span>
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -122,16 +146,19 @@ const AIChatRoom = () => {
                     message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
+                  {/* AI AVATAR (styled as described) */}
                   {message.sender === "ai" && (
-                    <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-4 w-4 text-brand-600" />
+                    <div className="w-8 h-8 bg-white border border-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      {/* Minimal silhouette/neutral (MessageCircle as neutral face), and could swap to user avatars later */}
+                      <MessageCircle className="h-5 w-5 text-brand-600" />
                     </div>
                   )}
+                  {/* AI message styling: pink with white text */}
                   <div
                     className={`max-w-[280px] p-3 rounded-lg ${
                       message.sender === "user"
                         ? "bg-brand-600 text-white"
-                        : "bg-gray-100 text-gray-900"
+                        : "bg-brand-100 text-white"
                     }`}
                   >
                     <p className="text-sm">{message.text}</p>
@@ -142,6 +169,7 @@ const AIChatRoom = () => {
                       })}
                     </span>
                   </div>
+                  {/* User AVATAR */}
                   {message.sender === "user" && (
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
                       <User className="h-4 w-4 text-gray-600" />
@@ -149,6 +177,8 @@ const AIChatRoom = () => {
                   )}
                 </div>
               ))}
+              {/* If AI is typing, show the animated typing bubble */}
+              {isAITyping && <AITypingBubble />}
             </div>
           </ScrollArea>
           
