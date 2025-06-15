@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,6 +82,12 @@ const Navbar = () => {
               <ShoppingCart className="w-5 h-5" />
               Start Shopping
             </Button>
+            <a
+              href="/categories"
+              className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap"
+            >
+              Discover
+            </a>
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap">How It Works</a>
             {isLoggedIn ? (
               <ProfileButton />
@@ -154,8 +159,12 @@ const Navbar = () => {
               <ShoppingCart className="w-5 h-5" />
               Start Shopping
             </Button>
-            <a href="#how-it-works" className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent">
-              How It Works
+            <a
+              href="/categories"
+              className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-foreground hover:bg-accent"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Discover
             </a>
             <div className="mt-4 space-y-2 px-3">
               {isLoggedIn ? (

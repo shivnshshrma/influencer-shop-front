@@ -13,6 +13,7 @@ import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import ForYou from "./pages/ForYou";
 import AllInfluencers from "./pages/AllInfluencers";
+import Categories from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/for-you" element={<ForYou />} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/measurements" element={<Profile />} />
