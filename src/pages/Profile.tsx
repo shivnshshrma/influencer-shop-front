@@ -31,6 +31,7 @@ const profileSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email" }),
   phone: z.string().regex(/^\d{10}$/, { message: "Phone must be 10 digits" }).optional(),
+  gender: z.enum(["male", "female"], { required_error: "Gender is required" }),
 });
 
 // Measurements form schema
@@ -51,12 +52,13 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Initialize with default values to prevent undefined issues
+  // Added gender to user state and default values
   const [user, setUser] = useState({
     name: "User",
     email: "user@example.com",
     phone: "9876543210",
     avatar: "",
+    gender: "male", // default
     measurements: {
       height: "170",
       chest: "90",
@@ -81,6 +83,7 @@ const Profile = () => {
           email: parsedUser.email || "user@example.com",
           phone: parsedUser.phone || "9876543210",
           avatar: parsedUser.avatar || "",
+          gender: parsedUser.gender || "male", // load or default
           measurements: {
             height: measurements.height || "170",
             chest: measurements.chest || "90",
@@ -103,6 +106,7 @@ const Profile = () => {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      gender: user.gender || "male",
     }
   });
 
@@ -111,6 +115,7 @@ const Profile = () => {
     profileForm.setValue("name", user.name);
     profileForm.setValue("email", user.email);
     profileForm.setValue("phone", user.phone || "");
+    profileForm.setValue("gender", user.gender || "male");
   }, [user, profileForm]);
 
   const measurementsForm = useForm<MeasurementsFormValues>({
@@ -178,6 +183,7 @@ const Profile = () => {
       name: data.name,
       email: data.email,
       phone: data.phone || user.phone,
+      gender: data.gender,
     };
     
     setUser(updatedUser);
@@ -282,6 +288,31 @@ const Profile = () => {
                             {...field} 
                             disabled={!isEditMode}
                           />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* NEW GENDER FIELD */}
+                  <FormField
+                    control={profileForm.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <FormControl>
+                          <div>
+                            <select
+                              {...field}
+                              disabled={!isEditMode}
+                              className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
+                            >
+                              <option value="">Select Gender</option>
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                            </select>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
