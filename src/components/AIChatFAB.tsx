@@ -17,20 +17,7 @@ const AIChatFAB = () => {
         <Bot className="h-6 w-6" />
         <span className="font-semibold hidden sm:block">Ask Styli</span>
       </button>
-      {open && (
-        <div className="fixed inset-0 flex items-end sm:items-center sm:justify-end z-50 bg-black/30 animate-fade-in">
-          <div className="w-full sm:w-[420px] max-h-[90vh]">
-            <AIChatRoom />
-            <button
-              className="block mx-auto mt-2 text-xs text-gray-500 hover:text-brand-600"
-              onClick={() => setOpen(false)}
-              aria-label="Close chat"
-            >
-              Close Chat
-            </button>
-          </div>
-        </div>
-      )}
+      <AIChatRoom isOpen={open} setIsOpen={setOpen} />
     </>
   );
 };
