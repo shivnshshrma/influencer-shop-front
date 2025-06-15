@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,13 +7,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import SignupForm from "../components/SignupForm";
 import Navbar from "../components/Navbar";
-
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const intent = searchParams.get('intent') || 'shopping';
   const [activeTab, setActiveTab] = useState("login");
-
   const handleLoginSuccess = () => {
     if (intent === 'influencer') {
       navigate("/influencer-profile");
@@ -22,7 +19,6 @@ const Auth = () => {
       navigate("/");
     }
   };
-
   const handleSignupSuccess = () => {
     if (intent === 'influencer') {
       navigate("/influencer-profile");
@@ -30,27 +26,16 @@ const Auth = () => {
       navigate("/");
     }
   };
-
   const getTitle = () => {
-    return intent === 'influencer' 
-      ? "Join as an Influencer" 
-      : "Start Shopping";
+    return intent === 'influencer' ? "Join as an Influencer" : "Start Shopping";
   };
-
   const getDescription = () => {
-    return intent === 'influencer' 
-      ? "Create an account or login to start your influencer journey" 
-      : "Create an account or login to start shopping";
+    return intent === 'influencer' ? "Create an account or login to start your influencer journey" : "Create an account or login to start shopping";
   };
-
   const getIcon = () => {
-    return intent === 'influencer' 
-      ? <UserPlus className="h-6 w-6 text-brand-600" />
-      : <ShoppingBag className="h-6 w-6 text-brand-600" />;
+    return intent === 'influencer' ? <UserPlus className="h-6 w-6 text-brand-600" /> : <ShoppingBag className="h-6 w-6 text-brand-600" />;
   };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="container mx-auto px-4 py-16">
@@ -76,7 +61,7 @@ const Auth = () => {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="login">
                   <div className="space-y-4">
-                    <CardTitle>Welcome Back</CardTitle>
+                    <CardTitle>Welcome </CardTitle>
                     <CardDescription>
                       Enter your credentials to access your account
                     </CardDescription>
@@ -97,18 +82,12 @@ const Auth = () => {
           </Card>
 
           <div className="mt-6 text-center">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate("/")}
-              className="text-gray-600 hover:text-gray-900"
-            >
+            <Button variant="ghost" onClick={() => navigate("/")} className="text-gray-600 hover:text-gray-900">
               ← Back to Home
             </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
