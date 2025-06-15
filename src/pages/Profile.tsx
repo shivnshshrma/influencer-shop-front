@@ -45,8 +45,28 @@ const measurementsSchema = z.object({
 });
 
 type Gender = "male" | "female";
+type BodyType =
+  | "pear"
+  | "hourglass"
+  | "rectangle"
+  | "invertedTriangle"
+  | "trapezoid"
+  | "triangle"
+  | "";
+type StylePreference =
+  | "casual"
+  | "formal"
+  | "athletic"
+  | "streetwear"
+  | "";
+type ColorSeason = "spring" | "summer" | "autumn" | "winter" | "";
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type ProfileFormValues = z.infer<typeof profileSchema> & {
+  bodyType?: BodyType;
+  stylePreference?: StylePreference;
+  colorSeason?: ColorSeason;
+  notes?: string;
+};
 type MeasurementsFormValues = z.infer<typeof measurementsSchema>;
 
 const Profile = () => {
@@ -61,6 +81,10 @@ const Profile = () => {
     phone: string;
     avatar: string;
     gender: Gender;
+    bodyType?: BodyType;
+    stylePreference?: StylePreference;
+    colorSeason?: ColorSeason;
+    notes?: string;
     measurements: {
       height: string;
       chest: string;
@@ -83,6 +107,10 @@ const Profile = () => {
     phone: "9876543210",
     avatar: "",
     gender: "male",
+    bodyType: "",
+    stylePreference: "",
+    colorSeason: "",
+    notes: "",
     measurements: {
       height: "170",
       chest: "90",
@@ -93,7 +121,7 @@ const Profile = () => {
     }
   });
 
-  // Load user data from localStorage when component mounts
+  // Load user data from localStorage on mount (now including extra fields)
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
     if (savedUser) {
@@ -106,7 +134,11 @@ const Profile = () => {
           email: parsedUser.email || "user@example.com",
           phone: parsedUser.phone || "9876543210",
           avatar: parsedUser.avatar || "",
-          gender, // enforce the type!
+          gender,
+          bodyType: parsedUser.bodyType || "",
+          stylePreference: parsedUser.stylePreference || "",
+          colorSeason: parsedUser.colorSeason || "",
+          notes: parsedUser.notes || "",
           measurements: {
             height: measurements.height || "170",
             chest: measurements.chest || "90",
@@ -129,7 +161,11 @@ const Profile = () => {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      gender: user.gender, // now safely typed
+      gender: user.gender,
+      bodyType: user.bodyType || "",
+      stylePreference: user.stylePreference || "",
+      colorSeason: user.colorSeason || "",
+      notes: user.notes || "",
     }
   });
 
@@ -138,7 +174,11 @@ const Profile = () => {
     profileForm.setValue("name", user.name);
     profileForm.setValue("email", user.email);
     profileForm.setValue("phone", user.phone || "");
-    profileForm.setValue("gender", user.gender); // gender is always "male" or "female"
+    profileForm.setValue("gender", user.gender);
+    profileForm.setValue("bodyType", user.bodyType || "");
+    profileForm.setValue("stylePreference", user.stylePreference || "");
+    profileForm.setValue("colorSeason", user.colorSeason || "");
+    profileForm.setValue("notes", user.notes || "");
   }, [user, profileForm]);
 
   const measurementsForm = useForm<MeasurementsFormValues>({
@@ -198,6 +238,15 @@ const Profile = () => {
     reader.readAsDataURL(file);
   };
 
+  // Get the first letter safely for the avatar fallback
+  const getInitial = () => {
+    if (user && user.name && typeof user.name === 'string' && user.name.length > 0) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
+  // ----------------------- Profile Submit with extra data --------------------------
   const handleProfileSubmit = (data: ProfileFormValues) => {
     console.log("Profile data:", data);
     // In a real app, you'd update the user profile here
@@ -207,40 +256,16 @@ const Profile = () => {
       email: data.email,
       phone: data.phone || user.phone,
       gender: data.gender,
+      bodyType: data.bodyType,
+      stylePreference: data.stylePreference,
+      colorSeason: data.colorSeason,
+      notes: data.notes,
     };
     
     setUser(updatedUser);
     localStorage.setItem("userData", JSON.stringify(updatedUser));
     setIsEditMode(false);
     toast.success("Profile updated successfully!");
-  };
-
-  const handleMeasurementsSubmit = (data: MeasurementsFormValues) => {
-    console.log("Measurements data:", data);
-    // In a real app, you'd update the user measurements here
-    const updatedUser = {
-      ...user,
-      measurements: {
-        height: data.height,
-        chest: data.chest || user.measurements.chest,
-        waist: data.waist || user.measurements.waist,
-        hips: data.hips || user.measurements.hips,
-        shoeSize: data.shoeSize || user.measurements.shoeSize,
-        skinTone: data.skinTone || user.measurements.skinTone,
-      }
-    };
-    
-    setUser(updatedUser);
-    localStorage.setItem("userData", JSON.stringify(updatedUser));
-    toast.success("Measurements updated successfully!");
-  };
-
-  // Get the first letter safely for the avatar fallback
-  const getInitial = () => {
-    if (user && user.name && typeof user.name === 'string' && user.name.length > 0) {
-      return user.name.charAt(0).toUpperCase();
-    }
-    return 'U';
   };
 
   return (
@@ -299,6 +324,7 @@ const Profile = () => {
             <TabsContent value="profile" className="mt-6">
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                  {/* ----- Full Name ----- */}
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -317,7 +343,7 @@ const Profile = () => {
                     )}
                   />
 
-                  {/* NEW GENDER FIELD */}
+                  {/* ----- Gender ----- */}
                   <FormField
                     control={profileForm.control}
                     name="gender"
@@ -342,6 +368,76 @@ const Profile = () => {
                     )}
                   />
 
+                  {/* ----- Body Type (new) ----- */}
+                  <FormField
+                    control={profileForm.control}
+                    name="bodyType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Body Type</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            disabled={!isEditMode}
+                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
+                          >
+                            {bodyTypeOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ----- Style Preference (new) ----- */}
+                  <FormField
+                    control={profileForm.control}
+                    name="stylePreference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Style Preference</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            disabled={!isEditMode}
+                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
+                          >
+                            {stylePreferenceOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ----- Color Season (new) ----- */}
+                  <FormField
+                    control={profileForm.control}
+                    name="colorSeason"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color Season / Skin Undertone</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            disabled={!isEditMode}
+                            className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1 disabled:bg-gray-100"
+                          >
+                            {colorSeasonOptions.map((option) => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ----- Email ----- */}
                   <FormField
                     control={profileForm.control}
                     name="email"
@@ -363,6 +459,7 @@ const Profile = () => {
                     )}
                   />
 
+                  {/* ----- Phone ----- */}
                   <FormField
                     control={profileForm.control}
                     name="phone"
@@ -380,6 +477,27 @@ const Profile = () => {
                               disabled={!isEditMode}
                             />
                           </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* ----- Notes (optional, new) ----- */}
+                  <FormField
+                    control={profileForm.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Personal Notes (optional)</FormLabel>
+                        <FormControl>
+                          <textarea
+                            {...field}
+                            disabled={!isEditMode}
+                            className="w-full rounded border border-gray-300 px-3 py-2 bg-white disabled:bg-gray-100 resize-none"
+                            rows={2}
+                            placeholder="Anything you'd like to add (e.g. fit challenges, preferences)..."
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
