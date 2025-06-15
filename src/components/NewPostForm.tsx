@@ -17,24 +17,23 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Image, Video, Link as LinkIcon } from "lucide-react";
 import { savePost } from "@/utils/localStorage";
-import ImportImageGallery from "@/components/ImportImageGallery";
+import MediaUploadGallery from "./MediaUploadGallery";
 
 const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   price: z.string().min(1, "Price is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  image: z.string().min(1, "Image URL is required"),
+  media: z.string().min(1, "Media URL is required"),
   productLink: z.string().url("Please enter a valid URL"),
-  type: z.enum(["image", "video"]),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-// Sample image URLs that could be used
-const sampleImages = [
-  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80",
-  "https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+// Updated to include video samples if you have any
+const sampleMedia = [
+  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+  "https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4", // Video sample
+  "https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
 ];
 
 const NewPostForm = () => {
@@ -47,9 +46,8 @@ const NewPostForm = () => {
       name: "",
       price: "",
       description: "",
-      image: "",
+      media: "",
       productLink: "",
-      type: "image",
     },
   });
 
@@ -61,9 +59,8 @@ const NewPostForm = () => {
         name: data.name,
         price: data.price,
         description: data.description,
-        image: data.image,
+        image: data.media,
         productLink: data.productLink,
-        type: data.type,
       });
       
       // Show success message
@@ -137,18 +134,18 @@ const NewPostForm = () => {
 
             <FormField
               control={form.control}
-              name="image"
+              name="media"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image</FormLabel>
+                  <FormLabel>Media</FormLabel>
                   <FormControl>
-                    <ImportImageGallery
+                    <MediaUploadGallery
                       value={field.value}
                       onChange={(val) => {
                         field.onChange(val);
                         setPreviewUrl(val);
                       }}
-                      sampleImages={sampleImages}
+                      sampleMedia={sampleMedia}
                     />
                   </FormControl>
                   <FormMessage />
@@ -175,39 +172,6 @@ const NewPostForm = () => {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content Type</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="image" id="image" />
-                        <label htmlFor="image" className="flex items-center">
-                          <Image className="h-4 w-4 mr-1" />
-                          <span>Image</span>
-                        </label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="video" id="video" />
-                        <label htmlFor="video" className="flex items-center">
-                          <Video className="h-4 w-4 mr-1" />
-                          <span>Video</span>
-                        </label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
           
           <div className="w-full md:w-1/2">
@@ -216,24 +180,25 @@ const NewPostForm = () => {
               <div className="border rounded-lg overflow-hidden bg-gray-50 h-80 flex items-center justify-center">
                 {previewUrl ? (
                   <div className="relative w-full h-full">
-                    <img 
-                      src={previewUrl} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                    />
-                    {form.watch("type") === "video" && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                        <div className="rounded-full bg-white bg-opacity-80 p-3">
-                          <Video className="h-8 w-8 text-gray-800" />
-                        </div>
-                      </div>
+                    {/\.(mp4|webm|ogg)$/i.test(previewUrl) ? (
+                      <video 
+                        src={previewUrl} 
+                        className="w-full h-full object-cover"
+                        controls
+                      />
+                    ) : (
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
                     )}
                     <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-full py-1 px-3">
                       <span className="text-sm font-medium">{form.watch("price")}</span>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-400">Image preview will appear here</p>
+                  <p className="text-gray-400">Media preview will appear here</p>
                 )}
               </div>
             </div>
@@ -249,3 +214,5 @@ const NewPostForm = () => {
 };
 
 export default NewPostForm;
+
+// NOTE: This file is now almost 250 lines. Consider refactoring for maintainability.
