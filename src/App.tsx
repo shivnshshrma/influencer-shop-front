@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import InfluencerProfile from "./pages/InfluencerProfile";
 import InfluencerTimeline from "./pages/InfluencerTimeline";
 import Wishlist from "./pages/Wishlist";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/measurements" element={<Profile />} />
             <Route path="/wishlist" element={<Wishlist />} />

@@ -2,11 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
 
 const Hero = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleJoinAsInfluencer = () => {
     // Check if user is logged in
@@ -16,12 +14,21 @@ const Hero = () => {
       // Redirect to influencer profile page
       navigate("/influencer-profile");
     } else {
-      // Show toast to prompt login
-      toast({
-        title: "Login Required",
-        description: "Please login or sign up to join as an influencer.",
-        variant: "destructive",
-      });
+      // Redirect to auth page with influencer intent
+      navigate("/auth?intent=influencer");
+    }
+  };
+
+  const handleStartShopping = () => {
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    
+    if (isLoggedIn) {
+      // User is logged in, can start shopping (stay on current page or navigate to products)
+      console.log("User can start shopping");
+    } else {
+      // Redirect to auth page with shopping intent
+      navigate("/auth?intent=shopping");
     }
   };
 
@@ -50,7 +57,11 @@ const Hero = () => {
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="rounded-md shadow">
-                  <Button size="lg" className="w-full flex items-center justify-center">
+                  <Button 
+                    size="lg" 
+                    className="w-full flex items-center justify-center"
+                    onClick={handleStartShopping}
+                  >
                     <ShoppingBag className="mr-2 h-5 w-5" />
                     Start Shopping
                   </Button>
