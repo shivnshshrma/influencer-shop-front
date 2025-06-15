@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Bot, User, Sparkles, Hanger } from "lucide-react";
+import { MessageCircle, Send, Bot, User, Sparkles } from "lucide-react";
 import {
   Sheet,
   SheetContent,
