@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,22 +22,18 @@ import {
 import ProfileButton from "./ProfileButton";
 import AIChatRoom from "./AIChatRoom";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn");
-    setIsLoggedIn(loggedInStatus === "true");
-  }, []);
 
   // Add start shopping handler
   const handleStartShopping = () => {
-    if (isLoggedIn) {
+    if (isAuthenticated) {
       navigate("/for-you");
     } else {
       navigate("/auth?intent=shopping");
@@ -91,7 +86,7 @@ const Navbar = () => {
               Discover
             </a>
             <a href="#how-it-works" className="text-foreground hover:text-brand-600 dark:hover:text-brand-400 transition-colors whitespace-nowrap">How It Works</a>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <ProfileButton />
             ) : (
               <div className="flex space-x-3">
@@ -169,7 +164,7 @@ const Navbar = () => {
               Discover
             </a>
             <div className="mt-4 space-y-2 px-3">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <Button 
                   className="w-full" 
                   onClick={() => {
@@ -227,7 +222,7 @@ const Navbar = () => {
               </CommandItem>
               <CommandItem className="flex items-center gap-2 py-3 text-foreground hover:bg-accent">
                 <img 
-                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+                  src="https://images.unsplash.com/photo-1611741385334-864f40e100b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" 
                   alt="Yoga Mat" 
                   className="w-10 h-10 object-cover rounded"
                 />
@@ -269,4 +264,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -31,29 +32,31 @@ const App = () => (
       disableTransitionOnChange
     >
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/for-you" element={<ForYou />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/measurements" element={<Profile />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/influencer/:id" element={<InfluencerTimeline />} />
-            <Route path="/influencer-profile" element={<InfluencerProfile />} />
-            <Route path="/influencers" element={<AllInfluencers />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/shop/post/:id" element={<PostDetails />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/for-you" element={<ForYou />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/measurements" element={<Profile />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/influencer/:id" element={<InfluencerTimeline />} />
+              <Route path="/influencer-profile" element={<InfluencerProfile />} />
+              <Route path="/influencers" element={<AllInfluencers />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop/post/:id" element={<PostDetails />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

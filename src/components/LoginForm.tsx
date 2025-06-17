@@ -1,13 +1,11 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { toast } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { setLoggedIn, saveUserData } from "@/utils/localStorage";
+import { useAuth } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -18,6 +16,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -31,29 +30,12 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setIsLoading(true);
     
     try {
-      // This is a mock login - in a real app, you'd connect to a backend
-      console.log("Login attempt with:", data.email);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Logged in successfully!");
-      
-      // Set logged in status
-      setLoggedIn(true);
-      
-      // Create a mock user or update existing one
-      saveUserData({
-        email: data.email,
-        name: data.email.split('@')[0], // Simple name derived from email
-      });
-      
+      await login(data.email, data.password);
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      toast.error("Login failed. Please try again.");
-      console.error(error);
+      // Error is already handled in the login function
     } finally {
       setIsLoading(false);
     }

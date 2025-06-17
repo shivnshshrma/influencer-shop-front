@@ -1,15 +1,13 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { toast } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Phone, Check } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Eye, EyeOff, Phone } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -17,6 +15,7 @@ const formSchema = z.object({
   phoneNumber: z.string().length(10, { message: "Phone number must be exactly 10 digits" }).regex(/^\d+$/, { message: "Phone number must contain only digits" }).optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Please confirm your password" }),
+  gender: z.enum(["male", "female"], { required_error: "Gender is required" }),
   terms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions"
   })
@@ -27,19 +26,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-// OTP verification schema
-const otpSchema = z.object({
-  otp: z.string().length(6, { message: "OTP must be 6 characters" })
-});
-
-type OTPData = z.infer<typeof otpSchema>;
-
 const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const [userData, setUserData] = useState<FormData | null>(null);
+  const { register } = useAuth();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -49,14 +40,8 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
+      gender: undefined,
       terms: false
-    }
-  });
-  
-  const otpForm = useForm<OTPData>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: {
-      otp: ""
     }
   });
   
@@ -64,56 +49,19 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setIsLoading(true);
     
     try {
-      // Store user data for later submission after OTP verification
-      setUserData(data);
-      
-      // Simulate sending OTP to email and phone
-      console.log("Sending OTP to:", {
+      await register({
+        name: data.fullName,
         email: data.email,
-        phone: data.phoneNumber ? `+91${data.phoneNumber}` : undefined
+        password: data.password,
+        phone: data.phoneNumber,
+        gender: data.gender,
       });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Verification code sent to your email and phone number");
-      setShowOtpVerification(true);
-    } catch (error) {
-      toast.error("Failed to send verification code. Please try again.");
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleOtpSubmit = async (data: OTPData) => {
-    setIsLoading(true);
-    
-    try {
-      if (!userData) {
-        throw new Error("User data is missing");
-      }
-      
-      // This is a mock OTP verification - in a real app, you'd verify with a backend
-      console.log("Verifying OTP:", data.otp);
-      console.log("Creating account with:", {
-        name: userData.fullName,
-        email: userData.email,
-        phone: userData.phoneNumber ? `+91${userData.phoneNumber}` : undefined,
-        termsAccepted: userData.terms
-      });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Account created successfully!");
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      toast.error("Failed to create account. Please try again.");
-      console.error(error);
+      // Error is already handled in the register function
     } finally {
       setIsLoading(false);
     }
@@ -126,83 +74,6 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-  
-  // Go back to signup form
-  const handleBackToForm = () => {
-    setShowOtpVerification(false);
-  };
-  
-  // Generate mock OTP for demo purposes
-  const handleResendOtp = async () => {
-    toast.success("New verification code sent");
-  };
-  
-  if (showOtpVerification) {
-    return (
-      <Form {...otpForm}>
-        <form onSubmit={otpForm.handleSubmit(handleOtpSubmit)} className="space-y-6">
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-semibold mb-2">Verify Your Account</h2>
-            <p className="text-gray-600">
-              Enter the 6-digit verification code sent to your email and phone number
-            </p>
-          </div>
-          
-          <FormField
-            control={otpForm.control}
-            name="otp"
-            render={({ field }) => (
-              <FormItem className="space-y-4">
-                <FormLabel>Verification Code</FormLabel>
-                <FormControl>
-                  <InputOTP 
-                    maxLength={6} 
-                    {...field} 
-                    onChange={(value) => field.onChange(value)}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="text-center">
-            <button 
-              type="button" 
-              onClick={handleResendOtp}
-              className="text-sm text-brand-600 hover:underline"
-            >
-              Didn't receive a code? Resend
-            </button>
-          </div>
-          
-          <div className="flex flex-col space-y-3">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Verifying..." : "Verify & Create Account"}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleBackToForm}
-              disabled={isLoading}
-            >
-              Back
-            </Button>
-          </div>
-        </form>
-      </Form>
-    );
-  }
   
   return (
     <Form {...form}>
@@ -261,6 +132,27 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                     value={field.value}
                   />
                 </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gender</FormLabel>
+              <FormControl>
+                <select
+                  {...field}
+                  className="w-full bg-white border border-gray-300 rounded px-4 py-2 mt-1"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -334,7 +226,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel className="text-sm font-normal">
-                  I agree to the <a href="#" className="text-brand-600 hover:underline">Terms and Conditions</a>
+                  I agree to the <a href="/terms" className="text-brand-600 hover:underline">Terms and Conditions</a>
                 </FormLabel>
                 <FormMessage />
               </div>
@@ -343,7 +235,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         />
         
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Sending Verification Code..." : "Continue"}
+          {isLoading ? "Creating Account..." : "Create Account"}
         </Button>
       </form>
     </Form>
