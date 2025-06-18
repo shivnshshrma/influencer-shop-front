@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, Post } from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { toast } from 'sonner';
 
 export const usePosts = (params?: { page?: number; limit?: number; category?: string; influencer_id?: string }) => {
@@ -51,7 +51,7 @@ export const useUpdatePost = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Post> }) => 
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
       apiClient.updatePost(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-posts'] });

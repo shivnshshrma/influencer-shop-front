@@ -1,35 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-
-// Types
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  gender: 'male' | 'female';
-  is_influencer: boolean;
-  avatar_url?: string;
-  body_type?: string;
-  style_preference?: string;
-  color_season?: string;
-  notes?: string;
-  bio?: string;
-  category?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserMeasurements {
-  height?: number;
-  chest?: number;
-  waist?: number;
-  hips?: number;
-  shoe_size?: string;
-  skin_tone?: string;
-}
-
 export interface Post {
   id: string;
   name: string;
@@ -41,146 +11,106 @@ export interface Post {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  author_id: string;
   users?: {
     id: string;
     name: string;
     avatar_url?: string;
     category?: string;
+    is_influencer: boolean;
   };
 }
 
 export interface WishlistItem {
   id: string;
   created_at: string;
-  posts: {
-    id: string;
-    name: string;
-    price: string;
-    media_urls: string[];
-    type: string;
-    users: {
-      id: string;
-      name: string;
-      avatar_url?: string;
-      category?: string;
-    };
-  };
+  posts: Post;
 }
 
-// API Client class
 class ApiClient {
-  private getAuthHeaders() {
-    const token = localStorage.getItem('auth_token');
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  }
-
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config: RequestInit = {
-      headers: this.getAuthHeaders(),
-      ...options,
-    };
-
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Network error' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-
-    return response.json();
-  }
-
   // Auth endpoints
-  async register(data: {
+  async register(userData: {
     name: string;
     email: string;
     password: string;
     phone?: string;
     gender: 'male' | 'female';
   }) {
-    return this.request<{ user: User; token: string }>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
     });
+
+    if (error) throw error;
+    return data;
   }
 
-  async login(data: { email: string; password: string }) {
-    return this.request<{ user: User; token: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  async login(credentials: { email: string; password: string }) {
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
+    if (error) throw error;
+    return data;
   }
 
-  async getCurrentUser() {
-    return this.request<{ user: User }>('/auth/me');
-  }
-
-  async refreshToken() {
-    return this.request<{ token: string }>('/auth/refresh', {
-      method: 'POST',
-    });
-  }
-
-  async logout() {
-    return this.request<{ message: string }>('/auth/logout', {
-      method: 'POST',
-    });
-  }
-
-  // User endpoints
-  async getUserProfile() {
-    return this.request<{ user: User & { user_measurements?: UserMeasurements } }>('/users/profile');
-  }
-
-  async updateProfile(data: Partial<User>) {
-    return this.request<{ user: User }>('/users/profile', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateMeasurements(data: UserMeasurements) {
-    return this.request<{ measurements: UserMeasurements }>('/users/measurements', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async upgradeToInfluencer(data: { bio?: string; category?: string }) {
-    return this.request<{ user: User }>('/users/upgrade-to-influencer', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateAvatar(avatar_url: string) {
-    return this.request<{ user: User }>('/users/avatar', {
-      method: 'POST',
-      body: JSON.stringify({ avatar_url }),
-    });
+  async getCurrentUser(token?: string) {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return { user };
   }
 
   // Posts endpoints
   async getPosts(params?: { page?: number; limit?: number; category?: string; influencer_id?: string }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.category) searchParams.append('category', params.category);
-    if (params?.influencer_id) searchParams.append('influencer_id', params.influencer_id);
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/posts${query ? `?${query}` : ''}`);
+    let query = supabase
+      .from('posts')
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category, is_influencer
+        )
+      `)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    if (params?.limit) {
+      const from = ((params.page || 1) - 1) * params.limit;
+      const to = from + params.limit - 1;
+      query = query.range(from, to);
+    }
+
+    if (params?.influencer_id) {
+      query = query.eq('author_id', params.influencer_id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      posts: data,
+      pagination: {
+        page: params?.page || 1,
+        limit: params?.limit || 20,
+        hasMore: data?.length === (params?.limit || 20)
+      }
+    };
   }
 
   async getPost(id: string) {
-    return this.request<{ post: Post }>(`/posts/${id}`);
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category, is_influencer, bio
+        )
+      `)
+      .eq('id', id)
+      .eq('is_published', true)
+      .single();
+
+    if (error) throw error;
+    return { post: data };
   }
 
-  async createPost(data: {
+  async createPost(postData: {
     name: string;
     description: string;
     price: string;
@@ -188,103 +118,172 @@ class ApiClient {
     media_urls: string[];
     type: 'image' | 'video';
   }) {
-    return this.request<{ post: Post }>('/posts', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([{
+        ...postData,
+        is_published: true,
+      }])
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return { post: data };
   }
 
   async getMyPosts(params?: { page?: number; limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/posts/my/posts${query ? `?${query}` : ''}`);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    let query = supabase
+      .from('posts')
+      .select('*')
+      .eq('author_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (params?.limit) {
+      const from = ((params.page || 1) - 1) * params.limit;
+      const to = from + params.limit - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      posts: data,
+      pagination: {
+        page: params?.page || 1,
+        limit: params?.limit || 20,
+        hasMore: data?.length === (params?.limit || 20)
+      }
+    };
   }
 
-  async updatePost(id: string, data: Partial<Post>) {
-    return this.request<{ post: Post }>(`/posts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  async updatePost(id: string, postData: Partial<Post>) {
+    const { data, error } = await supabase
+      .from('posts')
+      .update({
+        ...postData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { post: data };
   }
 
   async deletePost(id: string) {
-    return this.request<{ message: string }>(`/posts/${id}`, {
-      method: 'DELETE',
-    });
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Post deleted successfully' };
   }
 
   // Wishlist endpoints
   async getWishlist() {
-    return this.request<{ wishlistItems: WishlistItem[] }>('/wishlist');
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select(`
+        *,
+        posts (
+          *,
+          users!posts_author_id_fkey (
+            id, name, avatar_url, category
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { wishlistItems: data };
   }
 
-  async addToWishlist(post_id: string) {
-    return this.request<{ wishlistItem: WishlistItem }>('/wishlist', {
-      method: 'POST',
-      body: JSON.stringify({ post_id }),
-    });
+  async addToWishlist(postId: string) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .insert([{ post_id: postId }])
+      .select(`
+        *,
+        posts (
+          *,
+          users!posts_author_id_fkey (
+            id, name, avatar_url, category
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return { wishlistItem: data };
   }
 
   async removeFromWishlist(postId: string) {
-    return this.request<{ message: string }>(`/wishlist/${postId}`, {
-      method: 'DELETE',
-    });
+    const { error } = await supabase
+      .from('wishlist_items')
+      .delete()
+      .eq('post_id', postId);
+
+    if (error) throw error;
+    return { message: 'Item removed from wishlist' };
   }
 
   async checkWishlist(postId: string) {
-    return this.request<{ isInWishlist: boolean }>(`/wishlist/check/${postId}`);
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select('id')
+      .eq('post_id', postId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return { isInWishlist: !!data };
   }
 
-  // Influencers endpoints
-  async getInfluencers(params?: { page?: number; limit?: number; category?: string }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.category) searchParams.append('category', params.category);
-    
-    const query = searchParams.toString();
-    return this.request<{ influencers: User[]; pagination: any }>(`/influencers${query ? `?${query}` : ''}`);
+  // Users endpoints
+  async getUsers() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, email, avatar_url, category, is_influencer')
+      .eq('is_influencer', true);
+
+    if (error) throw error;
+    return { users: data };
   }
 
-  async getInfluencer(id: string) {
-    return this.request<{ influencer: User }>(`/influencers/${id}`);
+  async getUser(id: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return { user: data };
   }
 
-  async getInfluencerPosts(id: string, params?: { page?: number; limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/influencers/${id}/posts${query ? `?${query}` : ''}`);
-  }
+  async updateUser(id: string, userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        ...userData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-  // Recommendations endpoints
-  async getPersonalizedRecommendations(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ recommendations: Post[]; userProfile: any }>(`/recommendations/personalized${query ? `?${query}` : ''}`);
-  }
-
-  async getTrendingPosts(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ trendingPosts: Post[] }>(`/recommendations/trending${query ? `?${query}` : ''}`);
-  }
-
-  async getRecommendedInfluencers(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ recommendedInfluencers: User[] }>(`/recommendations/influencers${query ? `?${query}` : ''}`);
+    if (error) throw error;
+    return { user: data };
   }
 }
 

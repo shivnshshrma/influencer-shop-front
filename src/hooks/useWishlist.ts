@@ -16,6 +16,7 @@ export const useAddToWishlist = () => {
     mutationFn: (postId: string) => apiClient.addToWishlist(postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist-check'] });
       toast.success('Added to wishlist!');
     },
     onError: (error) => {
@@ -31,6 +32,7 @@ export const useRemoveFromWishlist = () => {
     mutationFn: (postId: string) => apiClient.removeFromWishlist(postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist-check'] });
       toast.success('Removed from wishlist');
     },
     onError: (error) => {

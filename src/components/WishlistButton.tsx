@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useAddToWishlist, useRemoveFromWishlist, useCheckWishlist } from "@/hooks/useWishlist";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface WishlistButtonProps {
   postId: string;
@@ -12,6 +13,7 @@ interface WishlistButtonProps {
 
 const WishlistButton = ({ postId, variant = "outline", size = "sm" }: WishlistButtonProps) => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const { data: wishlistCheck } = useCheckWishlist(postId);
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
@@ -23,7 +25,7 @@ const WishlistButton = ({ postId, variant = "outline", size = "sm" }: WishlistBu
     e.stopPropagation();
     
     if (!isAuthenticated) {
-      // Redirect to login or show login modal
+      navigate('/auth');
       return;
     }
     
@@ -33,10 +35,6 @@ const WishlistButton = ({ postId, variant = "outline", size = "sm" }: WishlistBu
       addToWishlist.mutate(postId);
     }
   };
-
-  if (!isAuthenticated) {
-    return null; // Don't show wishlist button for unauthenticated users
-  }
 
   return (
     <Button

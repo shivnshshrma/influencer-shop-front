@@ -111,7 +111,7 @@ const SignupForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number</FormLabel>
+              <FormLabel>Phone Number (Optional)</FormLabel>
               <FormControl>
                 <div className="flex">
                   <div className="flex items-center justify-center px-3 bg-gray-100 border border-r-0 border-input rounded-l-md">

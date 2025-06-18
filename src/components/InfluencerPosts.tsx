@@ -1,40 +1,21 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { getUserData, getPostsByAuthor, deletePost, type Post } from "@/utils/localStorage";
+import { useMyPosts, useDeletePost } from "@/hooks/usePosts";
 
 const InfluencerPosts = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { data: postsData, isLoading } = useMyPosts();
+  const deletePost = useDeletePost();
   const { toast } = useToast();
   
-  useEffect(() => {
-    // Load posts for current user
-    const userData = getUserData();
-    const userPosts = getPostsByAuthor(userData.id);
-    setPosts(userPosts);
-  }, []);
+  const posts = postsData?.posts || [];
   
-  const handleDeletePost = (postId: number) => {
+  const handleDeletePost = async (postId: string) => {
     try {
-      // Delete post using utility function
-      deletePost(postId);
-      
-      // Update state
-      setPosts(posts.filter(post => post.id !== postId));
-      
-      // Show success message
-      toast({
-        title: "Post deleted",
-        description: "Your post has been removed successfully.",
-      });
+      await deletePost.mutateAsync(postId);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete post. Please try again.",
-        variant: "destructive"
-      });
+      console.error("Failed to delete post:", error);
     }
   };
   
@@ -45,6 +26,14 @@ const InfluencerPosts = () => {
       day: 'numeric'
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Loading your posts...</p>
+      </div>
+    );
+  }
   
   if (posts.length === 0) {
     return (
@@ -62,7 +51,7 @@ const InfluencerPosts = () => {
           <div className="flex flex-col md:flex-row">
             <div className="w-full md:w-1/3 h-48 md:h-auto relative">
               <img 
-                src={post.image} 
+                src={post.media_urls?.[0] || '/placeholder.svg'} 
                 alt={post.name}
                 className="h-full w-full object-cover"
               />
@@ -81,14 +70,14 @@ const InfluencerPosts = () => {
             <div className="p-4 flex-1">
               <div className="flex justify-between items-start">
                 <h3 className="font-medium text-lg">{post.name}</h3>
-                <span className="text-sm text-gray-500">{formatDate(post.timestamp)}</span>
+                <span className="text-sm text-gray-500">{formatDate(post.created_at)}</span>
               </div>
               
               <p className="text-gray-600 mt-2 line-clamp-3">{post.description}</p>
               
               <div className="mt-4 flex flex-wrap gap-2">
                 <a 
-                  href={post.productLink} 
+                  href={post.product_link} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-sm text-brand-600 hover:text-brand-700"
@@ -108,6 +97,7 @@ const InfluencerPosts = () => {
                   size="sm"
                   onClick={() => handleDeletePost(post.id)}
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  disabled={deletePost.isPending}
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Delete
