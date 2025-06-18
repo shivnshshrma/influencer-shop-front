@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
+const API_BASE_URL = 'http://localhost:3002/api';
+
 export interface Post {
   id: string;
   name: string;
@@ -28,6 +30,24 @@ export interface WishlistItem {
 }
 
 class ApiClient {
+  private async _fetch(endpoint: string, options: RequestInit = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
   // Auth endpoints
   async register(userData: {
     name: string;
@@ -36,19 +56,21 @@ class ApiClient {
     phone?: string;
     gender: 'male' | 'female';
   }) {
-    const { data, error } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
+    const response = await this._fetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
     });
 
-    if (error) throw error;
-    return data;
+    return response;
   }
 
   async login(credentials: { email: string; password: string }) {
-    const { data, error } = await supabase.auth.signInWithPassword(credentials);
-    if (error) throw error;
-    return data;
+    const response = await this._fetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+
+    return response;
   }
 
   async getCurrentUser(token?: string) {
