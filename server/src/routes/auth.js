@@ -2,7 +2,6 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { supabase } from '../config/supabase.js';
-import { validateRequest, schemas } from '../middleware/validation.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -15,9 +14,17 @@ const generateToken = (userId) => {
 };
 
 // Register
-router.post('/register', validateRequest(schemas.register), async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone, gender } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password || !gender) {
+      return res.status(400).json({
+        error: 'Name, email, password, and gender are required',
+        code: 'MISSING_FIELDS'
+      });
+    }
 
     // Check if user already exists
     const { data: existingUser } = await supabase
@@ -79,9 +86,16 @@ router.post('/register', validateRequest(schemas.register), async (req, res) => 
 });
 
 // Login
-router.post('/login', validateRequest(schemas.login), async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        error: 'Email and password are required',
+        code: 'MISSING_FIELDS'
+      });
+    }
 
     // Get user with password
     const { data: user, error } = await supabase
@@ -140,42 +154,6 @@ router.get('/me', authenticateToken, async (req, res) => {
     res.status(500).json({
       error: 'Failed to get user data',
       code: 'GET_USER_ERROR'
-    });
-  }
-});
-
-// Refresh token
-router.post('/refresh', authenticateToken, async (req, res) => {
-  try {
-    const token = generateToken(req.user.id);
-    
-    res.json({
-      message: 'Token refreshed successfully',
-      token
-    });
-  } catch (error) {
-    console.error('Token refresh error:', error);
-    res.status(500).json({
-      error: 'Failed to refresh token',
-      code: 'TOKEN_REFRESH_ERROR'
-    });
-  }
-});
-
-// Logout (client-side token removal, but we can log it)
-router.post('/logout', authenticateToken, async (req, res) => {
-  try {
-    // In a more complex setup, you might want to blacklist the token
-    // For now, we'll just acknowledge the logout
-    
-    res.json({
-      message: 'Logout successful'
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-    res.status(500).json({
-      error: 'Logout failed',
-      code: 'LOGOUT_ERROR'
     });
   }
 });
