@@ -1,5 +1,4 @@
-import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase.js';
+import { supabase, supabaseAdmin } from '../config/supabase.js';
 
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -13,42 +12,35 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Get user from Supabase
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', decoded.userId)
-      .single();
+    // Verify token with Supabase Auth
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
 
-    if (error || !user) {
+    if (authError || !authUser) {
       return res.status(401).json({ 
         error: 'Invalid token',
         code: 'INVALID_TOKEN'
+      });
+    }
+
+    // Get user profile from database
+    const { data: user, error: profileError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
+
+    if (profileError || !user) {
+      return res.status(401).json({ 
+        error: 'User profile not found',
+        code: 'USER_NOT_FOUND'
       });
     }
 
     req.user = user;
+    req.authUser = authUser;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ 
-        error: 'Invalid token',
-        code: 'INVALID_TOKEN'
-      });
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        error: 'Token expired',
-        code: 'TOKEN_EXPIRED'
-      });
-    }
-
     res.status(500).json({ 
       error: 'Authentication failed',
       code: 'AUTH_ERROR'
@@ -63,21 +55,30 @@ export const optionalAuth = async (req, res, next) => {
 
     if (!token) {
       req.user = null;
+      req.authUser = null;
       return next();
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    const { data: user, error } = await supabase
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authUser) {
+      req.user = null;
+      req.authUser = null;
+      return next();
+    }
+
+    const { data: user, error: profileError } = await supabaseAdmin
       .from('users')
       .select('*')
-      .eq('id', decoded.userId)
+      .eq('id', authUser.id)
       .single();
 
-    req.user = error ? null : user;
+    req.user = profileError ? null : user;
+    req.authUser = authError ? null : authUser;
     next();
   } catch (error) {
     req.user = null;
+    req.authUser = null;
     next();
   }
 };

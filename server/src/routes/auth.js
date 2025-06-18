@@ -1,17 +1,8 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { supabase } from '../config/supabase.js';
+import { supabase, supabaseAdmin } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
-
-// Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-  });
-};
 
 // Register
 router.post('/register', async (req, res) => {
@@ -26,55 +17,65 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existingUser) {
-      return res.status(409).json({
-        error: 'User already exists with this email',
-        code: 'USER_EXISTS'
+    // Validate gender
+    if (!['male', 'female'].includes(gender)) {
+      return res.status(400).json({
+        error: 'Gender must be either "male" or "female"',
+        code: 'INVALID_GENDER'
       });
     }
 
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // 1. Create auth user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    // Create user
-    const { data: user, error } = await supabase
+    if (authError) {
+      console.error('Auth signup error:', authError);
+      return res.status(400).json({
+        error: authError.message,
+        code: 'AUTH_SIGNUP_FAILED'
+      });
+    }
+
+    if (!authData.user) {
+      return res.status(400).json({
+        error: 'Failed to create user account',
+        code: 'USER_CREATION_FAILED'
+      });
+    }
+
+    // 2. Create user profile using admin client to bypass RLS
+    const { data: user, error: profileError } = await supabaseAdmin
       .from('users')
       .insert([{
+        id: authData.user.id,
         name,
         email,
-        password_hash: hashedPassword,
         phone,
         gender,
         is_influencer: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
-      .select('id, name, email, phone, gender, is_influencer, avatar_url, created_at')
+      .select('id, name, email, phone, gender, is_influencer, avatar_url, body_type, style_preference, color_season, notes, bio, category, created_at, updated_at')
       .single();
 
-    if (error) {
-      console.error('User creation error:', error);
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      // Clean up auth user if profile creation fails
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return res.status(500).json({
-        error: 'Failed to create user',
-        code: 'USER_CREATION_FAILED'
+        error: 'Failed to create user profile',
+        code: 'PROFILE_CREATION_FAILED'
       });
     }
-
-    // Generate token
-    const token = generateToken(user.id);
 
     res.status(201).json({
       message: 'User registered successfully',
       user,
-      token
+      session: authData.session
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -97,40 +98,46 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Get user with password
-    const { data: user, error } = await supabase
+    // 1. Authenticate with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      console.error('Auth login error:', authError);
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    if (!authData.user || !authData.session) {
+      return res.status(401).json({
+        error: 'Authentication failed',
+        code: 'AUTH_FAILED'
+      });
+    }
+
+    // 2. Get user profile
+    const { data: user, error: profileError } = await supabaseAdmin
       .from('users')
-      .select('*')
-      .eq('email', email)
+      .select('id, name, email, phone, gender, is_influencer, avatar_url, body_type, style_preference, color_season, notes, bio, category, created_at, updated_at')
+      .eq('id', authData.user.id)
       .single();
 
-    if (error || !user) {
-      return res.status(401).json({
-        error: 'Invalid email or password',
-        code: 'INVALID_CREDENTIALS'
+    if (profileError || !user) {
+      console.error('Profile fetch error:', profileError);
+      return res.status(500).json({
+        error: 'Failed to fetch user profile',
+        code: 'PROFILE_FETCH_FAILED'
       });
     }
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
-
-    if (!isValidPassword) {
-      return res.status(401).json({
-        error: 'Invalid email or password',
-        code: 'INVALID_CREDENTIALS'
-      });
-    }
-
-    // Generate token
-    const token = generateToken(user.id);
-
-    // Remove password from response
-    const { password_hash, ...userWithoutPassword } = user;
 
     res.json({
       message: 'Login successful',
-      user: userWithoutPassword,
-      token
+      user,
+      session: authData.session
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -144,10 +151,8 @@ router.post('/login', async (req, res) => {
 // Get current user
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const { password_hash, ...userWithoutPassword } = req.user;
-    
     res.json({
-      user: userWithoutPassword
+      user: req.user
     });
   } catch (error) {
     console.error('Get user error:', error);

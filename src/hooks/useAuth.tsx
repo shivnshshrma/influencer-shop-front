@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/lib/api';
 import { toast } from 'sonner';
-import type { User } from '@supabase/supabase-js';
 
 interface AuthUser {
   id: string;
@@ -62,8 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
+        if (session?.access_token) {
+          await fetchUserProfile(session.access_token);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -76,28 +76,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        await fetchUserProfile(session.user.id);
+      if (event === 'SIGNED_IN' && session?.access_token) {
+        await fetchUserProfile(session.access_token);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
       }
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (token: string) => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) throw error;
-      setUser(data);
+      const response = await apiClient.getCurrentUser(token);
+      setUser(response.user);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
+      setUser(null);
     }
   };
 
@@ -105,38 +101,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
 
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-      });
+      // Call backend API to register user
+      const response = await apiClient.register(data);
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error('Failed to create user account');
+      if (response.session) {
+        // Set the session in Supabase client
+        await supabase.auth.setSession(response.session);
+        setUser(response.user);
+        toast.success('Account created successfully!');
+      } else {
+        throw new Error('Registration successful but no session returned');
       }
-
-      // 2. Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert([{
-          id: authData.user.id,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          gender: data.gender,
-          is_influencer: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }]);
-
-      if (profileError) throw profileError;
-
-      // 3. Fetch the created profile
-      await fetchUserProfile(authData.user.id);
-
-      toast.success('Account created successfully!');
     } catch (error: any) {
       console.error('Registration error:', error);
       toast.error(error.message || 'Registration failed');
@@ -150,16 +125,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Call backend API to login user
+      const response = await apiClient.login({ email, password });
 
-      if (error) throw error;
-
-      if (data.user) {
-        await fetchUserProfile(data.user.id);
+      if (response.session) {
+        // Set the session in Supabase client
+        await supabase.auth.setSession(response.session);
+        setUser(response.user);
         toast.success('Logged in successfully!');
+      } else {
+        throw new Error('Login successful but no session returned');
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -187,15 +162,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (!user) throw new Error('No user logged in');
 
-      const { error } = await supabase
-        .from('users')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('No valid session');
 
-      if (error) throw error;
+      await apiClient.updateUser(user.id, data, session.access_token);
 
       setUser(prev => prev ? { ...prev, ...data } : null);
       toast.success('Profile updated successfully!');
@@ -208,8 +178,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     try {
-      if (!user) return;
-      await fetchUserProfile(user.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetchUserProfile(session.access_token);
+      }
     } catch (error) {
       console.error('Failed to refresh user:', error);
     }

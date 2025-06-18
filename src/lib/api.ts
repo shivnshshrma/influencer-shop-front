@@ -1,291 +1,166 @@
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Types
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  gender: 'male' | 'female';
-  is_influencer: boolean;
-  avatar_url?: string;
-  body_type?: string;
-  style_preference?: string;
-  color_season?: string;
-  notes?: string;
-  bio?: string;
-  category?: string;
-  created_at: string;
-  updated_at: string;
+interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+  message?: string;
 }
 
-export interface UserMeasurements {
-  height?: number;
-  chest?: number;
-  waist?: number;
-  hips?: number;
-  shoe_size?: string;
-  skin_tone?: string;
-}
-
-export interface Post {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  product_link: string;
-  media_urls: string[];
-  type: 'image' | 'video';
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-  users?: {
-    id: string;
-    name: string;
-    avatar_url?: string;
-    category?: string;
-  };
-}
-
-export interface WishlistItem {
-  id: string;
-  created_at: string;
-  posts: {
-    id: string;
-    name: string;
-    price: string;
-    media_urls: string[];
-    type: string;
-    users: {
-      id: string;
-      name: string;
-      avatar_url?: string;
-      category?: string;
-    };
-  };
-}
-
-// API Client class
 class ApiClient {
-  private getAuthHeaders() {
-    const token = localStorage.getItem('auth_token');
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
+  private baseURL: string;
+
+  constructor(baseURL: string) {
+    this.baseURL = baseURL;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    
     const config: RequestInit = {
-      headers: this.getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
       ...options,
     };
 
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Network error' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
 
-    return response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
   }
 
   // Auth endpoints
-  async register(data: {
+  async register(userData: {
     name: string;
     email: string;
     password: string;
     phone?: string;
     gender: 'male' | 'female';
   }) {
-    return this.request<{ user: User; token: string }>('/auth/register', {
+    return this.request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(userData),
     });
   }
 
-  async login(data: { email: string; password: string }) {
-    return this.request<{ user: User; token: string }>('/auth/login', {
+  async login(credentials: { email: string; password: string }) {
+    return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(credentials),
     });
   }
 
-  async getCurrentUser() {
-    return this.request<{ user: User }>('/auth/me');
-  }
-
-  async refreshToken() {
-    return this.request<{ token: string }>('/auth/refresh', {
-      method: 'POST',
-    });
-  }
-
-  async logout() {
-    return this.request<{ message: string }>('/auth/logout', {
-      method: 'POST',
-    });
-  }
-
-  // User endpoints
-  async getUserProfile() {
-    return this.request<{ user: User & { user_measurements?: UserMeasurements } }>('/users/profile');
-  }
-
-  async updateProfile(data: Partial<User>) {
-    return this.request<{ user: User }>('/users/profile', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateMeasurements(data: UserMeasurements) {
-    return this.request<{ measurements: UserMeasurements }>('/users/measurements', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async upgradeToInfluencer(data: { bio?: string; category?: string }) {
-    return this.request<{ user: User }>('/users/upgrade-to-influencer', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateAvatar(avatar_url: string) {
-    return this.request<{ user: User }>('/users/avatar', {
-      method: 'POST',
-      body: JSON.stringify({ avatar_url }),
+  async getCurrentUser(token: string) {
+    return this.request('/auth/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
   // Posts endpoints
-  async getPosts(params?: { page?: number; limit?: number; category?: string; influencer_id?: string }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.category) searchParams.append('category', params.category);
-    if (params?.influencer_id) searchParams.append('influencer_id', params.influencer_id);
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/posts${query ? `?${query}` : ''}`);
+  async getPosts(token?: string) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return this.request('/posts', { headers });
   }
 
-  async getPost(id: string) {
-    return this.request<{ post: Post }>(`/posts/${id}`);
+  async getPost(id: string, token?: string) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return this.request(`/posts/${id}`, { headers });
   }
 
-  async createPost(data: {
-    name: string;
-    description: string;
-    price: string;
-    product_link: string;
-    media_urls: string[];
-    type: 'image' | 'video';
-  }) {
-    return this.request<{ post: Post }>('/posts', {
+  async createPost(postData: any, token: string) {
+    return this.request('/posts', {
       method: 'POST',
-      body: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(postData),
     });
   }
 
-  async getMyPosts(params?: { page?: number; limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/posts/my/posts${query ? `?${query}` : ''}`);
-  }
-
-  async updatePost(id: string, data: Partial<Post>) {
-    return this.request<{ post: Post }>(`/posts/${id}`, {
+  async updatePost(id: string, postData: any, token: string) {
+    return this.request(`/posts/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(postData),
     });
   }
 
-  async deletePost(id: string) {
-    return this.request<{ message: string }>(`/posts/${id}`, {
+  async deletePost(id: string, token: string) {
+    return this.request(`/posts/${id}`, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
   // Wishlist endpoints
-  async getWishlist() {
-    return this.request<{ wishlistItems: WishlistItem[] }>('/wishlist');
+  async getWishlist(token: string) {
+    return this.request('/wishlist', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
-  async addToWishlist(post_id: string) {
-    return this.request<{ wishlistItem: WishlistItem }>('/wishlist', {
+  async addToWishlist(postId: string, token: string) {
+    return this.request('/wishlist', {
       method: 'POST',
-      body: JSON.stringify({ post_id }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ postId }),
     });
   }
 
-  async removeFromWishlist(postId: string) {
-    return this.request<{ message: string }>(`/wishlist/${postId}`, {
+  async removeFromWishlist(postId: string, token: string) {
+    return this.request(`/wishlist/${postId}`, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
-  async checkWishlist(postId: string) {
-    return this.request<{ isInWishlist: boolean }>(`/wishlist/check/${postId}`);
+  // Users endpoints
+  async getUsers(token?: string) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return this.request('/users', { headers });
   }
 
-  // Influencers endpoints
-  async getInfluencers(params?: { page?: number; limit?: number; category?: string }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.category) searchParams.append('category', params.category);
-    
-    const query = searchParams.toString();
-    return this.request<{ influencers: User[]; pagination: any }>(`/influencers${query ? `?${query}` : ''}`);
+  async getUser(id: string, token?: string) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return this.request(`/users/${id}`, { headers });
   }
 
-  async getInfluencer(id: string) {
-    return this.request<{ influencer: User }>(`/influencers/${id}`);
-  }
-
-  async getInfluencerPosts(id: string, params?: { page?: number; limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append('page', params.page.toString());
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ posts: Post[]; pagination: any }>(`/influencers/${id}/posts${query ? `?${query}` : ''}`);
-  }
-
-  // Recommendations endpoints
-  async getPersonalizedRecommendations(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ recommendations: Post[]; userProfile: any }>(`/recommendations/personalized${query ? `?${query}` : ''}`);
-  }
-
-  async getTrendingPosts(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ trendingPosts: Post[] }>(`/recommendations/trending${query ? `?${query}` : ''}`);
-  }
-
-  async getRecommendedInfluencers(params?: { limit?: number }) {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    
-    const query = searchParams.toString();
-    return this.request<{ recommendedInfluencers: User[] }>(`/recommendations/influencers${query ? `?${query}` : ''}`);
+  async updateUser(id: string, userData: any, token: string) {
+    return this.request(`/users/${id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient(API_BASE_URL);
