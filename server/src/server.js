@@ -1,13 +1,18 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
 
 // Import routes
-import authRoutes from './routes/auth.js';
+const authRoutes = require('./routes/auth');
+const postsRoutes = require('./routes/posts');
+const usersRoutes = require('./routes/users');
+const wishlistRoutes = require('./routes/wishlist');
+const influencersRoutes = require('./routes/influencers');
+const recommendationsRoutes = require('./routes/recommendations');
+
+// Import middleware
+const errorHandler = require('./middleware/errorHandler');
+const notFound = require('./middleware/notFound');
 
 // Load environment variables
 dotenv.config();
@@ -15,113 +20,38 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 // CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'https://localhost:8080',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  optionsSuccessStatus: 200
+};
 
 // Middleware
-app.use(helmet());
-app.use(compression());
-app.use(limiter);
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging middleware
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('combined'));
-}
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postsRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/influencers', influencersRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV
-  });
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-
-// Basic route
-app.get('/', (req, res) => {
-  res.json({ message: 'InfluStyle Backend API' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-
-  // Default error
-  let error = {
-    message: err.message || 'Internal Server Error',
-    status: err.status || 500,
-    code: err.code || 'INTERNAL_ERROR'
-  };
-
-  // Supabase errors
-  if (err.code && err.code.startsWith('23')) {
-    if (err.code === '23505') {
-      error = {
-        message: 'Resource already exists',
-        status: 409,
-        code: 'DUPLICATE_RESOURCE'
-      };
-    }
-  }
-
-  // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    error = {
-      message: 'Invalid token',
-      status: 401,
-      code: 'INVALID_TOKEN'
-    };
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    error = {
-      message: 'Token expired',
-      status: 401,
-      code: 'TOKEN_EXPIRED'
-    };
-  }
-
-  res.status(error.status).json({
-    error: error.message,
-    code: error.code,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    code: 'NOT_FOUND',
-    path: req.originalUrl,
-    method: req.method
-  });
-});
+// Error handling middleware (should be last)
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📱 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL}`);
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`CORS enabled for: ${process.env.FRONTEND_URL || 'https://localhost:8080'}`);
 });
 
-export default app;
+module.exports = app;
