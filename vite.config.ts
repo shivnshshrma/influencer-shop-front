@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
-    https: false, // Change to false for deployment compatibility
+    https: false,
   },
   plugins: [
     react(),
