@@ -3,102 +3,51 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 
-// Import routes
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import postRoutes from './routes/posts.js';
-import wishlistRoutes from './routes/wishlist.js';
-import influencerRoutes from './routes/influencers.js';
-import recommendationRoutes from './routes/recommendations.js';
-
-// Import middleware
-import { errorHandler } from './middleware/errorHandler.js';
-import { notFound } from './middleware/notFound.js';
-
+// Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3002;
-
-// Security middleware
-app.use(helmet());
-app.use(compression());
+const PORT = process.env.PORT || 3001;
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
 
+// Middleware
+app.use(helmet());
+app.use(cors());
+app.use(compression());
+app.use(morgan('combined'));
 app.use(limiter);
-
-// CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Logging middleware
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('combined'));
-}
+app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV,
-    port: PORT
-  });
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/influencers', influencerRoutes);
-app.use('/api/recommendations', recommendationRoutes);
+// Basic route
+app.get('/', (req, res) => {
+  res.json({ message: 'InfluStyle Backend API' });
+});
 
 // Error handling middleware
-app.use(notFound);
-app.use(errorHandler);
-
-// Start server
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📱 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-export default app;
