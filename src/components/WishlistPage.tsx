@@ -77,7 +77,7 @@ const WishlistPage = () => {
           <div key={item.id} className="product-card group border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-card">
             <div className="relative">
               <img 
-                src={item.posts.media_urls[0]} 
+                src={item.posts.media_urls?.[0] || '/placeholder.svg'} 
                 alt={item.posts.name}
                 className="h-64 w-full object-cover"
               />
@@ -104,7 +104,10 @@ const WishlistPage = () => {
                 <span className="text-sm text-muted-foreground">{item.posts.users.category}</span>
               )}
               <div className="mt-4 flex justify-between items-center">
-                <Button size="sm">
+                <Button 
+                  size="sm"
+                  onClick={() => window.open(item.posts.product_link, '_blank')}
+                >
                   Shop Now
                 </Button>
                 <Button 

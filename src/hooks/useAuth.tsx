@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { apiClient } from '@/lib/api';
 import { toast } from 'sonner';
 
 interface AuthUser {
@@ -89,8 +88,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserProfile = async (token: string) => {
     try {
-      const response = await apiClient.getCurrentUser(token);
-      setUser(response.user);
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      
+      if (authUser) {
+        // Get user profile from database
+        const { data: profile, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        if (error) {
+          console.error('Failed to fetch user profile:', error);
+          setUser(null);
+        } else {
+          setUser(profile);
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
       setUser(null);
@@ -101,17 +115,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
 
-      // Call backend API to register user
-      const response = await apiClient.register(data);
+      // 1. Create auth user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+      });
 
-      if (response.session) {
-        // Set the session in Supabase client
-        await supabase.auth.setSession(response.session);
-        setUser(response.user);
-        toast.success('Account created successfully!');
-      } else {
-        throw new Error('Registration successful but no session returned');
+      if (authError) {
+        console.error('Auth signup error:', authError);
+        throw new Error(authError.message);
       }
+
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      // 2. Create user profile in database
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .insert([{
+          id: authData.user.id,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          gender: data.gender,
+          is_influencer: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Clean up auth user if profile creation fails
+        await supabase.auth.signOut();
+        throw new Error('Failed to create user profile');
+      }
+
+      setUser(profile);
+      toast.success('Account created successfully!');
     } catch (error: any) {
       console.error('Registration error:', error);
       toast.error(error.message || 'Registration failed');
@@ -125,17 +168,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
 
-      // Call backend API to login user
-      const response = await apiClient.login({ email, password });
+      // Authenticate with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (response.session) {
-        // Set the session in Supabase client
-        await supabase.auth.setSession(response.session);
-        setUser(response.user);
-        toast.success('Logged in successfully!');
-      } else {
-        throw new Error('Login successful but no session returned');
+      if (authError) {
+        console.error('Auth login error:', authError);
+        throw new Error('Invalid email or password');
       }
+
+      if (!authData.user || !authData.session) {
+        throw new Error('Authentication failed');
+      }
+
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Profile fetch error:', profileError);
+        throw new Error('Failed to fetch user profile');
+      }
+
+      setUser(profile);
+      toast.success('Logged in successfully!');
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Login failed');
@@ -162,12 +223,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (!user) throw new Error('No user logged in');
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('No valid session');
+      const { data: updatedProfile, error } = await supabase
+        .from('users')
+        .update({
+          ...data,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
 
-      await apiClient.updateUser(user.id, data, session.access_token);
+      if (error) {
+        console.error('Update error:', error);
+        throw new Error('Failed to update profile');
+      }
 
-      setUser(prev => prev ? { ...prev, ...data } : null);
+      setUser(updatedProfile);
       toast.success('Profile updated successfully!');
     } catch (error: any) {
       console.error('Update error:', error);

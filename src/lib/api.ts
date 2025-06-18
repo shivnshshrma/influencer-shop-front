@@ -1,49 +1,33 @@
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+export interface Post {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  product_link: string;
+  media_urls: string[];
+  type: 'image' | 'video';
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  author_id: string;
+  users?: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+    category?: string;
+    is_influencer: boolean;
+  };
+}
 
-interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-  message?: string;
+export interface WishlistItem {
+  id: string;
+  created_at: string;
+  posts: Post;
 }
 
 class ApiClient {
-  private baseURL: string;
-
-  constructor(baseURL: string) {
-    this.baseURL = baseURL;
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
-    }
-  }
-
   // Auth endpoints
   async register(userData: {
     name: string;
@@ -52,115 +36,255 @@ class ApiClient {
     phone?: string;
     gender: 'male' | 'female';
   }) {
-    return this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
     });
+
+    if (error) throw error;
+    return data;
   }
 
   async login(credentials: { email: string; password: string }) {
-    return this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
+    if (error) throw error;
+    return data;
   }
 
-  async getCurrentUser(token: string) {
-    return this.request('/auth/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  async getCurrentUser(token?: string) {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return { user };
   }
 
   // Posts endpoints
-  async getPosts(token?: string) {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    return this.request('/posts', { headers });
+  async getPosts(params?: { page?: number; limit?: number; category?: string; influencer_id?: string }) {
+    let query = supabase
+      .from('posts')
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category, is_influencer
+        )
+      `)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    if (params?.limit) {
+      const from = ((params.page || 1) - 1) * params.limit;
+      const to = from + params.limit - 1;
+      query = query.range(from, to);
+    }
+
+    if (params?.influencer_id) {
+      query = query.eq('author_id', params.influencer_id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      posts: data,
+      pagination: {
+        page: params?.page || 1,
+        limit: params?.limit || 20,
+        hasMore: data?.length === (params?.limit || 20)
+      }
+    };
   }
 
-  async getPost(id: string, token?: string) {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    return this.request(`/posts/${id}`, { headers });
+  async getPost(id: string) {
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category, is_influencer, bio
+        )
+      `)
+      .eq('id', id)
+      .eq('is_published', true)
+      .single();
+
+    if (error) throw error;
+    return { post: data };
   }
 
-  async createPost(postData: any, token: string) {
-    return this.request('/posts', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(postData),
-    });
+  async createPost(postData: {
+    name: string;
+    description: string;
+    price: string;
+    product_link: string;
+    media_urls: string[];
+    type: 'image' | 'video';
+  }) {
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([{
+        ...postData,
+        is_published: true,
+      }])
+      .select(`
+        *,
+        users!posts_author_id_fkey (
+          id, name, avatar_url, category
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return { post: data };
   }
 
-  async updatePost(id: string, postData: any, token: string) {
-    return this.request(`/posts/${id}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(postData),
-    });
+  async getMyPosts(params?: { page?: number; limit?: number }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    let query = supabase
+      .from('posts')
+      .select('*')
+      .eq('author_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (params?.limit) {
+      const from = ((params.page || 1) - 1) * params.limit;
+      const to = from + params.limit - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return {
+      posts: data,
+      pagination: {
+        page: params?.page || 1,
+        limit: params?.limit || 20,
+        hasMore: data?.length === (params?.limit || 20)
+      }
+    };
   }
 
-  async deletePost(id: string, token: string) {
-    return this.request(`/posts/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  async updatePost(id: string, postData: Partial<Post>) {
+    const { data, error } = await supabase
+      .from('posts')
+      .update({
+        ...postData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { post: data };
+  }
+
+  async deletePost(id: string) {
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Post deleted successfully' };
   }
 
   // Wishlist endpoints
-  async getWishlist(token: string) {
-    return this.request('/wishlist', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  async getWishlist() {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select(`
+        *,
+        posts (
+          *,
+          users!posts_author_id_fkey (
+            id, name, avatar_url, category
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { wishlistItems: data };
   }
 
-  async addToWishlist(postId: string, token: string) {
-    return this.request('/wishlist', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ postId }),
-    });
+  async addToWishlist(postId: string) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .insert([{ post_id: postId }])
+      .select(`
+        *,
+        posts (
+          *,
+          users!posts_author_id_fkey (
+            id, name, avatar_url, category
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return { wishlistItem: data };
   }
 
-  async removeFromWishlist(postId: string, token: string) {
-    return this.request(`/wishlist/${postId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  async removeFromWishlist(postId: string) {
+    const { error } = await supabase
+      .from('wishlist_items')
+      .delete()
+      .eq('post_id', postId);
+
+    if (error) throw error;
+    return { message: 'Item removed from wishlist' };
+  }
+
+  async checkWishlist(postId: string) {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select('id')
+      .eq('post_id', postId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return { isInWishlist: !!data };
   }
 
   // Users endpoints
-  async getUsers(token?: string) {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    return this.request('/users', { headers });
+  async getUsers() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, email, avatar_url, category, is_influencer')
+      .eq('is_influencer', true);
+
+    if (error) throw error;
+    return { users: data };
   }
 
-  async getUser(id: string, token?: string) {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    return this.request(`/users/${id}`, { headers });
+  async getUser(id: string) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return { user: data };
   }
 
-  async updateUser(id: string, userData: any, token: string) {
-    return this.request(`/users/${id}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
-    });
+  async updateUser(id: string, userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        ...userData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { user: data };
   }
 }
 
-export const apiClient = new ApiClient(API_BASE_URL);
+export const apiClient = new ApiClient();
