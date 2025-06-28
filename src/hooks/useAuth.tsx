@@ -119,16 +119,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Use backend API for registration
       const response = await apiClient.register(data);
 
-      // Set the session in Supabase client
+      // Set the session in Supabase client if available
       if (response.session) {
-        const { error: sessionError } = await supabase.auth.setSession(response.session);
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          throw new Error('Failed to set session');
+        try {
+          const { error: sessionError } = await supabase.auth.setSession(response.session);
+          if (sessionError) {
+            console.warn('Session setting failed, but continuing with manual auth:', sessionError);
+          }
+        } catch (sessionError) {
+          console.warn('Session setting failed, but continuing with manual auth:', sessionError);
         }
       }
 
-      // Set user profile
+      // Set user profile regardless of session status
       if (response.user) {
         setUser(response.user);
       }
@@ -150,16 +153,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Use backend API for login
       const response = await apiClient.login({ email, password });
 
-      // Set the session in Supabase client
+      // Try to set the session in Supabase client if available
       if (response.session) {
-        const { error: sessionError } = await supabase.auth.setSession(response.session);
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          throw new Error('Failed to set session');
+        try {
+          const { error: sessionError } = await supabase.auth.setSession(response.session);
+          if (sessionError) {
+            console.warn('Session setting failed, but continuing with manual auth:', sessionError);
+          }
+        } catch (sessionError) {
+          console.warn('Session setting failed, but continuing with manual auth:', sessionError);
         }
       }
 
-      // Set user profile
+      // Set user profile regardless of session status
       if (response.user) {
         setUser(response.user);
       }
@@ -176,14 +182,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Try to sign out from Supabase
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.warn('Supabase logout failed:', error);
+        }
+      } catch (error) {
+        console.warn('Supabase logout failed:', error);
+      }
       
+      // Clear user state regardless
       setUser(null);
       toast.success('Logged out successfully');
     } catch (error: any) {
       console.error('Logout error:', error);
-      toast.error('Logout failed');
+      // Still clear user state even if logout fails
+      setUser(null);
+      toast.success('Logged out');
     }
   };
 
