@@ -40,12 +40,26 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      process.env.FRONTEND_URL || 'https://localhost:8080',
+      process.env.FRONTEND_URL || 'http://localhost:8080',
       'http://localhost:8080',
-      'https://localhost:8080'
+      'https://localhost:8080',
+      'http://127.0.0.1:8080',
+      'https://127.0.0.1:8080',
+      // Add WebContainer URL pattern
+      /.*\.local-credentialless\.webcontainer-api\.io$/
     ];
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Check if the origin is in the allowed list or matches a pattern
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      } else if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -99,7 +113,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📱 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL || 'https://localhost:8080'}`);
+  console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL || 'http://localhost:8080'}`);
 });
 
 export default app;
