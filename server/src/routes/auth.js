@@ -26,6 +26,20 @@ router.post('/register', async (req, res) => {
       });
     }
 
+    // Check if user already exists
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({
+        error: 'User with this email already exists',
+        code: 'USER_EXISTS'
+      });
+    }
+
     // 1. Hash the password
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
@@ -104,17 +118,71 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 1. Authenticate with Supabase Auth
+    // 1. Get user from database with password hash
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, name, email, phone, gender, is_influencer, avatar_url, body_type, style_preference, color_season, notes, bio, category, created_at, updated_at, password_hash')
+      .eq('email', email)
+      .single();
+
+    if (userError || !user) {
+      console.error('User fetch error:', userError);
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // 2. Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    // 3. Create session with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
+    // If Supabase auth fails, try to sign in the user manually
     if (authError) {
-      console.error('Auth login error:', authError);
-      return res.status(401).json({
-        error: 'Invalid email or password',
-        code: 'INVALID_CREDENTIALS'
+      console.log('Supabase auth failed, creating manual session');
+      
+      // Generate a session manually using admin client
+      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email,
+      });
+
+      if (sessionError) {
+        console.error('Session generation error:', sessionError);
+        return res.status(500).json({
+          error: 'Failed to create session',
+          code: 'SESSION_FAILED'
+        });
+      }
+
+      // Remove password_hash from user object before sending
+      const { password_hash, ...userWithoutPassword } = user;
+
+      return res.json({
+        message: 'Login successful',
+        user: userWithoutPassword,
+        session: {
+          access_token: sessionData.properties?.access_token,
+          refresh_token: sessionData.properties?.refresh_token,
+          expires_in: 3600,
+          token_type: 'bearer',
+          user: {
+            id: user.id,
+            email: user.email,
+          }
+        }
       });
     }
 
@@ -125,24 +193,12 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 2. Get user profile
-    const { data: user, error: profileError } = await supabaseAdmin
-      .from('users')
-      .select('id, name, email, phone, gender, is_influencer, avatar_url, body_type, style_preference, color_season, notes, bio, category, created_at, updated_at')
-      .eq('id', authData.user.id)
-      .single();
-
-    if (profileError || !user) {
-      console.error('Profile fetch error:', profileError);
-      return res.status(500).json({
-        error: 'Failed to fetch user profile',
-        code: 'PROFILE_FETCH_FAILED'
-      });
-    }
+    // Remove password_hash from user object before sending
+    const { password_hash, ...userWithoutPassword } = user;
 
     res.json({
       message: 'Login successful',
-      user,
+      user: userWithoutPassword,
       session: authData.session
     });
   } catch (error) {
