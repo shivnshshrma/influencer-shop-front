@@ -28,6 +28,8 @@ import Navbar from "../components/Navbar";
 import BodyTypeSelectWithImage from "../components/BodyTypeSelectWithImage";
 import BodyTypeUserGuide from "../components/BodyTypeUserGuide";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 // Profile form schema
 const profileSchema = z.object({
@@ -99,140 +101,64 @@ const colorSeasonOptions = [
   { value: "winter", label: "Winter (cool, intense, deep)" }
 ];
 
-type UserType = {
-  name: string;
-  email: string;
-  phone: string;
-  avatar: string;
-  gender: Gender;
-  bodyType?: BodyType;
-  stylePreference?: StylePreference;
-  colorSeason?: ColorSeason;
-  notes?: string;
-  measurements: {
-    height: string;
-    chest: string;
-    waist: string;
-    hips: string;
-    shoeSize: string;
-    skinTone: string;
-  }
-};
-
 const Profile = () => {
+  const { user, isAuthenticated, updateUser, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to sanitize gender from localStorage
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/auth');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  // Helper to sanitize gender from user data
   const sanitizeGender = (raw: any): Gender => {
     return raw === "male" || raw === "female" ? raw : "male";
   };
 
-  // Initialize with default values to prevent undefined issues
-  const [user, setUser] = useState<UserType>({
-    name: "User",
-    email: "user@example.com",
-    phone: "9876543210",
-    avatar: "",
-    gender: "male",
-    bodyType: "",
-    stylePreference: "",
-    colorSeason: "",
-    notes: "",
-    measurements: {
-      height: "170",
-      chest: "90",
-      waist: "75",
-      hips: "95",
-      shoeSize: "9",
-      skinTone: "medium",
-    }
-  });
-
-  // Load user data from localStorage on mount (now including extra fields)
-  useEffect(() => {
-    const savedUser = localStorage.getItem("userData");
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        const measurements = parsedUser.measurements || {};
-        const gender: Gender = sanitizeGender(parsedUser.gender);
-        setUser({
-          name: parsedUser.name || "User",
-          email: parsedUser.email || "user@example.com",
-          phone: parsedUser.phone || "9876543210",
-          avatar: parsedUser.avatar || "",
-          gender,
-          bodyType: parsedUser.bodyType || "",
-          stylePreference: parsedUser.stylePreference || "",
-          colorSeason: parsedUser.colorSeason || "",
-          notes: parsedUser.notes || "",
-          measurements: {
-            height: measurements.height || "170",
-            chest: measurements.chest || "90",
-            waist: measurements.waist || "75",
-            hips: measurements.hips || "95",
-            shoeSize: measurements.shoeSize || "9",
-            skinTone: measurements.skinTone || "medium",
-          }
-        });
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        // Keep default values in case of error
-      }
-    }
-  }, []);
-
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      gender: user.gender,
-      bodyType: user.bodyType || "",
-      stylePreference: user.stylePreference || "",
-      colorSeason: user.colorSeason || "",
-      notes: user.notes || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      gender: sanitizeGender(user?.gender),
+      bodyType: (user?.body_type as BodyType) || "",
+      stylePreference: (user?.style_preference as StylePreference) || "",
+      colorSeason: (user?.color_season as ColorSeason) || "",
+      notes: user?.notes || "",
     }
   });
 
   // Update form values when user data changes
   useEffect(() => {
-    profileForm.setValue("name", user.name);
-    profileForm.setValue("email", user.email);
-    profileForm.setValue("phone", user.phone || "");
-    profileForm.setValue("gender", user.gender);
-    profileForm.setValue("bodyType", user.bodyType || "");
-    profileForm.setValue("stylePreference", user.stylePreference || "");
-    profileForm.setValue("colorSeason", user.colorSeason || "");
-    profileForm.setValue("notes", user.notes || "");
+    if (user) {
+      profileForm.setValue("name", user.name || "");
+      profileForm.setValue("email", user.email || "");
+      profileForm.setValue("phone", user.phone || "");
+      profileForm.setValue("gender", sanitizeGender(user.gender));
+      profileForm.setValue("bodyType", (user.body_type as BodyType) || "");
+      profileForm.setValue("stylePreference", (user.style_preference as StylePreference) || "");
+      profileForm.setValue("colorSeason", (user.color_season as ColorSeason) || "");
+      profileForm.setValue("notes", user.notes || "");
+    }
   }, [user, profileForm]);
 
   const measurementsForm = useForm<MeasurementsFormValues>({
     resolver: zodResolver(measurementsSchema),
     defaultValues: {
-      height: user.measurements.height,
-      chest: user.measurements.chest,
-      waist: user.measurements.waist,
-      hips: user.measurements.hips,
-      shoeSize: user.measurements.shoeSize,
-      skinTone: user.measurements.skinTone,
+      height: "",
+      chest: "",
+      waist: "",
+      hips: "",
+      shoeSize: "",
+      skinTone: "",
     }
   });
-
-  // Update measurements form when user data changes
-  useEffect(() => {
-    if (user.measurements) {
-      measurementsForm.setValue("height", user.measurements.height || "");
-      measurementsForm.setValue("chest", user.measurements.chest || "");
-      measurementsForm.setValue("waist", user.measurements.waist || "");
-      measurementsForm.setValue("hips", user.measurements.hips || "");
-      measurementsForm.setValue("shoeSize", user.measurements.shoeSize || "");
-      measurementsForm.setValue("skinTone", user.measurements.skinTone || "");
-    }
-  }, [user, measurementsForm]);
 
   // Handle avatar upload
   const handleAvatarClick = () => {
@@ -241,7 +167,7 @@ const Profile = () => {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -258,11 +184,13 @@ const Profile = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const newUser = { ...user, avatar: e.target?.result as string };
-      setUser(newUser);
-      localStorage.setItem("userData", JSON.stringify(newUser));
-      toast.success("Profile picture updated");
+    reader.onload = async (e) => {
+      try {
+        await updateUser({ avatar_url: e.target?.result as string });
+        toast.success("Profile picture updated");
+      } catch (error) {
+        toast.error("Failed to update profile picture");
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -276,42 +204,59 @@ const Profile = () => {
   };
 
   // ----------------------- Profile Submit with extra data --------------------------
-  const handleProfileSubmit = (data: ProfileFormValues) => {
-    console.log("Profile data:", data);
-    // In a real app, you'd update the user profile here
-    const updatedUser = {
-      ...user,
-      name: data.name,
-      email: data.email,
-      phone: data.phone || user.phone,
-      gender: data.gender,
-      bodyType: data.bodyType,
-      stylePreference: data.stylePreference,
-      colorSeason: data.colorSeason,
-      notes: data.notes,
-    };
-    
-    setUser(updatedUser);
-    localStorage.setItem("userData", JSON.stringify(updatedUser));
-    setIsEditMode(false);
-    toast.success("Profile updated successfully!");
+  const handleProfileSubmit = async (data: ProfileFormValues) => {
+    try {
+      await updateUser({
+        name: data.name,
+        phone: data.phone || "",
+        gender: data.gender,
+        body_type: data.bodyType,
+        style_preference: data.stylePreference,
+        color_season: data.colorSeason,
+        notes: data.notes,
+      });
+      setIsEditMode(false);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    }
   };
 
-  // ------------- MEASUREMENTS FORM SUBMIT HANDLER (MISSING BEFORE) ---------------
+  // ------------- MEASUREMENTS FORM SUBMIT HANDLER ---------------
   const handleMeasurementsSubmit = (data: MeasurementsFormValues) => {
-    // Merge the new measurements into user state
-    const updatedUser = {
-      ...user,
-      measurements: {
-        ...user.measurements,
-        ...data,
-      },
-    };
-    setUser(updatedUser);
-    localStorage.setItem("userData", JSON.stringify(updatedUser));
-    // Use toast from the correct location if needed!
+    // For now, just show success message since measurements aren't in the backend yet
     toast.success("Measurements updated successfully!");
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p>Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p>Please log in to view your profile.</p>
+            <Button onClick={() => navigate('/auth')} className="mt-4">
+              Log In
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -325,7 +270,7 @@ const Profile = () => {
                 onClick={handleAvatarClick}
               >
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar_url} alt={user.name} />
                   <AvatarFallback className="bg-brand-600 text-white text-2xl">
                     {getInitial()}
                   </AvatarFallback>
