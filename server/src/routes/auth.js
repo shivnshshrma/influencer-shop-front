@@ -1,6 +1,7 @@
 import express from 'express';
 import { supabase, supabaseAdmin } from '../config/supabase.js';
 import { authenticateToken } from '../middleware/auth.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -25,7 +26,11 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // 1. Create auth user with Supabase Auth
+    // 1. Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(password, salt);
+
+    // 2. Create auth user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -46,7 +51,7 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // 2. Create user profile using admin client to bypass RLS
+    // 3. Create user profile using admin client to bypass RLS
     const { data: user, error: profileError } = await supabaseAdmin
       .from('users')
       .insert([{
@@ -55,6 +60,7 @@ router.post('/register', async (req, res) => {
         email,
         phone,
         gender,
+        password_hash, // Add the hashed password
         is_influencer: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

@@ -31,21 +31,26 @@ export interface WishlistItem {
 
 class ApiClient {
   private async _fetch(endpoint: string, options: RequestInit = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
+    try {
+      const url = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
     }
-
-    return response.json();
   }
 
   // Auth endpoints
@@ -56,21 +61,31 @@ class ApiClient {
     phone?: string;
     gender: 'male' | 'female';
   }) {
-    const response = await this._fetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
+    try {
+      const response = await this._fetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+      });
 
-    return response;
+      return response;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   }
 
   async login(credentials: { email: string; password: string }) {
-    const response = await this._fetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    try {
+      const response = await this._fetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
 
-    return response;
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   }
 
   async getCurrentUser(token?: string) {
