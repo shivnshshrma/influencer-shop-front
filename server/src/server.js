@@ -47,7 +47,10 @@ const corsOptions = {
       'https://127.0.0.1:8080',
       'https://funny-sprinkles-57505f.netlify.app',
       // Add WebContainer URL pattern
-      /.*\.local-credentialless\.webcontainer-api\.io$/
+      /.*\.local-credentialless\.webcontainer-api\.io$/,
+      // Add Railway URL patterns
+      /.*\.railway\.app$/,
+      /.*\.up\.railway\.app$/
     ];
     
     // Check if the origin is in the allowed list or matches a pattern
